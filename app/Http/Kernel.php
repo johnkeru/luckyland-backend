@@ -2,6 +2,12 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\AllAccessToRolesMiddleware;
+use App\Http\Middleware\FrontDeskMiddleware;
+use App\Http\Middleware\HouseKeepingMiddleware;
+use App\Http\Middleware\InventoryMiddleware;
+use App\Http\Middleware\InventoryOrFrontDeskMiddleware;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -63,5 +69,12 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+
+        'admin' => AdminMiddleware::class,
+        'inventory' => InventoryMiddleware::class,
+        'frontDesk' => FrontDeskMiddleware::class,
+        'inventoryOrFrontDesk' => InventoryOrFrontDeskMiddleware::class,
+        'houseKeeping' => HouseKeepingMiddleware::class,
+        'all_roles' => AllAccessToRolesMiddleware::class,
     ];
 }

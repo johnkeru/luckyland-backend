@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
 use App\Models\Role;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -16,8 +17,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
         // Creating Admin and assign all the system's roles.
         User::insert([
             [
@@ -38,5 +37,19 @@ class DatabaseSeeder extends Seeder
         $this->call(RoleSeeder::class);
         User::find(1)->roles()->attach(Role::all());
         $this->call(AddressSeeder::class);
+
+        $this->call(CategorySeeder::class);
+        $this->call(ItemSeeder::class);
+
+        $this->call(DeliverySeeder::class);
+
+        $this->call(RoomTypeSeeder::class);
+        $this->call(RoomSeeder::class);
+
+        $this->call(CottageTypeSeeder::class);
+        $this->call(CottageSeeder::class);
+
+        $this->call(CustomerSeeder::class);
+        // $this->call(EmployeeSeeder::class);
     }
 }

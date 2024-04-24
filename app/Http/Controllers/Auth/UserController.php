@@ -3,6 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AddEmployeeRequest;
+use App\Http\Requests\AddRegularEmployeeRequest;
+use App\Http\Requests\ChangePasswordRequest;
+use App\Http\Requests\UpdateEmployeeRequest;
+use App\Http\Responses\EmployeeIndexResponse;
+use App\Models\Address;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
@@ -80,13 +87,14 @@ class UserController extends Controller
             }
 
             // Retrieve authenticated user
-            $user = User::where('email', $request->email)->first();
+            $user = User::with(['roles', 'address'])->where('email', $request->email)->first();
 
             // Return successful login response
             return response()->json([
                 'success' => true,
                 'message' => 'User logged in successfully',
                 'data' => [
+                    'user' => $user,
                     'token' => $user->createToken("API TOKEN")->plainTextToken
                 ]
             ], 200);
@@ -171,5 +179,146 @@ class UserController extends Controller
                 'success' => false,
                 'message' => __($status)
             ], 400);
+    }
+
+    public function index()
+    {
+        try {
+            // SEARCH FILTERS
+            // http://localhost:8000/api/users?search=anyvalue
+            $search = request()->query('search');
+            $firstName = request()->query('firstName');
+            $role = request()->query('role');
+            $address = request()->query('address');
+            $status = request()->query('status') ?? 'active';
+            $trash = request()->query('trash');
+
+            $users = User::onlyActive($status)
+                ->search($search)
+                ->orderByFirstName($firstName)
+                ->orderByAddress($address)
+                ->latest('created_at')
+                ->filterByRole($role) // causing the problem for regular
+                ->withTrashcan($trash)
+                ->whereDoesntHave('roles', function ($query) {
+                    $query->where('roleName', 'Admin');
+                })
+                ->with(['roles', 'address'])
+                ->paginate(8);
+
+            return new EmployeeIndexResponse($users);
+        } catch (\Exception $e) {
+            // Log or handle the exception as needed
+            return response()->json(['success' => false, 'message' => 'An error occured', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getRoles()
+    {
+        return Role::all();
+    }
+
+    public function updateImage()
+    {
+        $image = request()->input('image');
+        $user = User::with(['roles', 'address'])->find(auth()->user()->id);
+        $user->update(['image' => $image]);
+        return response()->json(['success' => true, 'message' => 'Successfully updated.', 'data' => $user, 'image' => $image]);
+    }
+
+    public function addEmployee(AddEmployeeRequest $request)
+    {
+        try {
+            $data = $request->validated();
+            $address = new Address($data);
+
+            $roles = $data['roles'];
+            $newEmployee = User::create($data);
+            $newEmployee->address()->save($address);
+            $newEmployee->roles()->attach($roles);
+
+            return response()->json(['success' => true, 'message' => 'Successfully added.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'An error occured.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function addRegularEmployee(AddRegularEmployeeRequest $request)
+    {
+        try {
+            $data = $request->validated();
+            $address = new Address($data);
+            $data['type'] = 'regular';
+            $newEmployee = User::create($data);
+            $newEmployee->address()->save($address);
+
+            return response()->json(['success' => true, 'message' => 'Successfully added.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'An error occured.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function updateEmployee($id, UpdateEmployeeRequest $request)
+    {
+        try {
+            $employee = User::with(['address', 'roles'])->findOrFail($id);
+            $data = $request->validated();
+            $employee->roles()->sync($data['roles']);
+            if ($employee->address) {
+                $employee->address->update($data);
+            } else {
+                $address = new Address($data);
+                $employee->address()->save($address);
+            }
+            $employee->update($data);
+            return response()->json(['success' => true, 'message' => 'Successfully updated.', 'data' => $employee]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'An error occured.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function changePassword($id, ChangePasswordRequest $request)
+    {
+        try {
+            $data = $request->validated();
+            $user = User::with(['address', 'roles'])->findOrFail($id);
+
+            if (!Hash::check($data['current_password'], $user->password)) {
+                return response()->json([
+                    'success' => false,
+                    'field' => 'current_password',
+                    'msg' => 'The provided current password is incorrect.',
+                ], 400);
+            }
+
+            $user->update([
+                'password' => Hash::make($data['new_password']),
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'Password changed successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'An error occured.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function softDeleteOrRestoreEmployee($id)
+    {
+        try {
+            $employee = User::withTrashed()->find($id);
+
+            if (!$employee) {
+                return response()->json(['success' => false, 'message' => 'User not found.'], 404);
+            }
+
+            if ($employee->trashed()) {
+                $employee->restore();
+                return response()->json(['success' => true, 'message' => 'Successfully restored.']);
+            }
+
+            $employee->delete();
+            return response()->json(['success' => true, 'message' => 'Successfully soft-deleted.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'An error occured.', 'error' => $e->getMessage()], 500);
+        }
     }
 }

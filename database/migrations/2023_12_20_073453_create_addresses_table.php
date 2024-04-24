@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('zip_code')->nullable();
 
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
-            // $table->foreignId('customer_id')->nullable()->constrained('customers')->onDelete('set null');
+            $table->foreignId('customer_id')->nullable()->constrained('customers')->onDelete('set null');
 
             $table->timestamps();
         });
