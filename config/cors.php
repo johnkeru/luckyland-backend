@@ -17,7 +17,7 @@ return [
 
     'paths' => ['*'],
 
-    'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH'],
+    'allowed_methods' => ['*'],
 
     'allowed_origins' => [env('FRONTEND_URL'), 'https://testing-backend-dusky.vercel.app'],
 

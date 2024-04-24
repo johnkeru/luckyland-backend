@@ -34,6 +34,10 @@ class UserController extends Controller
     public function user()
     {
         $user = User::with(['roles', 'address'])->find(request()->user()->id);
+        return response()->json([
+            'user' => Auth::user(),
+            'data' => $user
+        ]);
         return $user;
     }
 
