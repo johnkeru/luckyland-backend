@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
                 'firstName' => 'Amy',
                 'middleName' => 'P.',
                 'lastName' => 'Trinanes',
-                'email' => 'jrquerobin@forbescollege.org',
+                'email' => 'keru@gmail.com',
                 'phoneNumber' => '09123456789',
                 'graduated_at' => 'Bicol University',
                 'description' => "Meet the visionary owner of Luckyland Resort, a hospitality enthusiast with a passion for creating unforgettable experiences. With a keen eye for detail and a commitment to excellence, they ensure that every guest at Luckyland Resort is treated to a world-class stay. From luxurious accommodations to top-notch amenities, the owner's dedication to hospitality shines through, making",
@@ -49,7 +49,8 @@ class DatabaseSeeder extends Seeder
         $this->call(CottageTypeSeeder::class);
         $this->call(CottageSeeder::class);
 
-        $this->call(CustomerSeeder::class);
-        // $this->call(EmployeeSeeder::class);
+        $this->call(EmployeeSeeder::class);
+
+        // $this->call(CustomerSeeder::class);
     }
 }

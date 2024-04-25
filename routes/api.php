@@ -43,8 +43,6 @@ Route::prefix('reservations')->group(function () {
     Route::post('available-suggestions', [ReservationController::class, 'suggestions']);
 
     Route::post('create-reservation', [ReservationController::class, 'customerCreateReservation']);
-    Route::put('gcash-payment/{reservation}', [ReservationController::class, 'gcashPayment']);
-
     Route::put('reschedule', [ReservationController::class, 'reschedule']);
 });
 

@@ -507,7 +507,6 @@ class ReservationController extends Controller
         try {
 
             $id = Auth::id();
-
             $validatedData = $request->validated();
 
             $checkIn = $validatedData['checkIn'];
@@ -546,9 +545,11 @@ class ReservationController extends Controller
                             $quantity = $addOn['quantity'];
                             $item = Item::where('id', $item_id)->first();
                             if ($item->status === 'Out of Stock' || $item->currentQuantity === 0) {
+                                // this is only for add ons
                                 return response()->json([
                                     'success' => false,
-                                    'message' => $item->name . ' just got out of stock.'
+                                    'message' => 'We apologize, but the previous reservation has taken the last ' . $item->name . '. Would you like to continue without it?',
+                                    'data' => ['reservedAddOnId' => ['id' => $room->id, 'item_id' => $item->id, 'price' => $item->price, 'name' => $item->name]]
                                 ], 400);
                             }
                             $item->currentQuantity -= $quantity;
@@ -562,17 +563,18 @@ class ReservationController extends Controller
                         }
                     }
 
+                    // ITEMS FOR ROOMS
                     foreach ($room->items as $item) {
                         $pivot = $item->pivot;
-                        if (!$pivot->isBed) {
-                            if ($item->status === 'Out of Stock' || $item->currentQuantity === 0) {
-                                return response()->json([
-                                    'success' => false,
-                                    'message' => $item->name . ' just got out of stock.'
-                                ], 400);
+                        if (!$pivot->isBed) { // if isBed is still false in pivot
+                            $quantityToDeduct = $isBed ? $pivot->maxQuantity : $pivot->minQuantity;
+                            if ($item->currentQuantity >= $quantityToDeduct) { // if currentQuantity below quantityToDeduct then don't allow it to deduct anymore as it will go currentQuantity to negative!. 
+                                $item->currentQuantity -= $quantityToDeduct;
+                                $room->items()->updateExistingPivot($item->id, ['isBed' => $isBed]);
+                            } else {
+                                // left the currentQuantity as it is.
+                                $room->items()->updateExistingPivot($item->id, ['isBed' => $isBed, 'needStock' => $quantityToDeduct]);
                             }
-                            $item->currentQuantity -= $isBed ? $pivot->maxQuantity : $pivot->minQuantity;
-                            $room->items()->updateExistingPivot($item->id, ['isBed' => $isBed]);
                             if ($item->currentQuantity !== 0 && $item->currentQuantity < $item->reOrderPoint) {
                                 $item->status = 'Low Stock';
                             } else if ($item->currentQuantity === 0) {
@@ -590,33 +592,17 @@ class ReservationController extends Controller
                     $cottageId = $cottageIdWithAddOns['id'];
                     $cottage = Cottage::findOrFail($cottageId);
 
-                    foreach ($cottage->items as $item) {
-                        $pivot = $item->pivot;
-                        if ($item->status === 'Out of Stock' || $item->currentQuantity === 0) {
-                            return response()->json([
-                                'success' => false,
-                                'message' => $item->name . ' just got out of stock.',
-                            ], 400);
-                        }
-                        $item->currentQuantity -= $pivot->quantity;
-                        if ($item->currentQuantity !== 0 && $item->currentQuantity < $item->reOrderPoint) {
-                            $item->status = 'Low Stock';
-                        } else if ($item->currentQuantity === 0) {
-                            $item->status = 'Out of Stock';
-                        }
-                        $item->save();
-                    }
-
-
                     if (isset($cottageIdWithAddOns['addOns'])) {
                         foreach ($cottageIdWithAddOns['addOns'] as $addOn) {
                             $item_id = $addOn['item_id'];
                             $quantity = $addOn['quantity'];
                             $item = Item::where('id', $item_id)->first();
                             if ($item->status === 'Out of Stock' || $item->currentQuantity === 0) {
+                                // this is only for add ons
                                 return response()->json([
                                     'success' => false,
-                                    'message' => $item->name . ' just got out of stock.'
+                                    'message' => 'We apologize, but the previous reservation has taken the last ' . $item->name . '. Would you like to continue without it?',
+                                    'data' => ['reservedAddOnId' => ['id' => $cottage->id, 'item_id' => $item->id, 'price' => $item->price, 'name' => $item->name]]
                                 ], 400);
                             }
                             $item->currentQuantity -= $quantity;
@@ -628,6 +614,22 @@ class ReservationController extends Controller
                             $cottage->items()->attach([$item_id => ['quantity' => $quantity]]);
                             $item->save();
                         }
+                    }
+
+                    foreach ($cottage->items as $item) {
+                        $pivot = $item->pivot;
+                        if ($item->currentQuantity >= $pivot->quantity) {
+                            $item->currentQuantity -= $pivot->quantity;
+                        } else {
+                            // left the currentQuantity as it is.
+                            $cottage->items()->updateExistingPivot($item->id, ['needStock' => $quantityToDeduct]);
+                        }
+                        if ($item->currentQuantity !== 0 && $item->currentQuantity < $item->reOrderPoint) {
+                            $item->status = 'Low Stock';
+                        } else if ($item->currentQuantity === 0) {
+                            $item->status = 'Out of Stock';
+                        }
+                        $item->save();
                     }
                 }
             }
@@ -697,10 +699,70 @@ class ReservationController extends Controller
                 ]);
             }
 
+            // GCASH PAYMENT:
+            $gcashPayment = request()->gCashRefNumber;
+            $paid = request()->paid ?? 0;
+
+            if ($id) {
+                if ($paid) {
+                    $reservation->update(['paid' => $paid, 'balance' => 0]);
+                } else {
+                    $reservation->update(['gCashRefNumber' => $gcashPayment, 'paid' => $paid, 'balance' => 0]);
+                }
+            }
+
+            if (!$id) {
+                $reservation->update(['gCashRefNumber' => $gcashPayment]);
+                $recipient = $reservation->customer->email;
+                $arrivalTime = "2:00pm";
+                $departureTime = "12:00pm";
+                $arrivalDate = \Carbon\Carbon::parse($reservation->checkIn)->format('F j');
+                $departureDate = \Carbon\Carbon::parse($reservation->checkOut)->format('F j');
+                $emailContent = [
+                    'reservationHASH' => $reservation->reservationHASH,
+                    'arrivalDateTime' => "$arrivalDate at $arrivalTime",
+                    'departureDateTime' => "$departureDate at $departureTime",
+                    'total' => number_format($reservation->total, 2),
+                    'paid' => number_format($reservation->paid, 2),
+                    'balance' => number_format($reservation->balance, 2),
+                    'status' => $reservation->status,
+                    'customerName' => $reservation->customer->firstName . ' ' . $reservation->customer->lastName,
+                    'rooms' => $reservation->rooms,
+                    'cottages' => $reservation->cottages, //(optional),
+                    'rescheduleLink' => $this->generateTokenLinkForReschedule($reservation, $recipient)
+                ];
+                if (env('APP_PROD')) {
+                    Mail::to($recipient)->send(new SuccessfulReservationWRescheduleMail($emailContent));
+                }
+
+                $frontDesksEmail = User::whereHas('roles', function ($query) {
+                    $query->where('roleName', 'Front Desk');
+                })->pluck('email');
+                $emailContentForAllFrontDesks = [
+                    'reservationHASH' => $emailContent['reservationHASH'],
+                    'arrivalDateTime' => "$arrivalDate at $arrivalTime",
+                    'departureDateTime' => "$departureDate at $departureTime",
+                    'email' => $recipient,
+                    'customerName' => $emailContent['customerName'],
+                    'rooms' => $emailContent['rooms'],
+                    'cottages' => $emailContent['cottages'], //(optional),
+                    'rescheduleLink' => $emailContent['rescheduleLink'],
+
+                    'total' => $emailContent['total'],
+                    'paid' => $emailContent['paid'],
+                    'balance' => $emailContent['balance'],
+                    'status' => $emailContent['status'],
+                ];
+
+                if (env('APP_PROD')) {
+                    Mail::to($frontDesksEmail)->send(new SomeOneJustReservedMail($emailContentForAllFrontDesks));
+                }
+            }
+            // END OF GCASH PAYMENT
+
             return response()->json([
-                'message' => 'Successfully reserved.',
                 'success' => true,
-                'data' => $reservation->id,
+                'message' => $id ? 'Successfully Reserved!' : 'Your GCash payment is being processed. We will validate the GCash reference code shortly.'
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -721,23 +783,36 @@ class ReservationController extends Controller
             foreach ($rooms as $room) {
                 $items = $room->items;
                 foreach ($items as $item) {
-
                     $isItemForRoom = array_reduce($item->categories->toArray(), function ($carry, $category) {
                         return $carry && ($category['name'] === 'Room' || $category['name'] === 'Resort');
                     }, true);
 
                     $pivot = $item->pivot;
-                    $item->currentQuantity += $pivot->isBed ? $pivot->maxQuantity : $pivot->minQuantity;
+                    // + $pivot->needStock?
+                    if ($pivot->isBed) {
+                        if ($pivot->needStock !== 0) {
+                            $item->currentQuantity += 0;
+                        } else {
+                            $item->currentQuantity += $pivot->maxQuantity;
+                        }
+                    } else {
+                        if ($pivot->needStock !== 0) {
+                            $item->currentQuantity += 0;
+                        } else {
+                            $item->currentQuantity += $pivot->minQuantity;
+                        }
+                    }
                     if ($item->currentQuantity > $item->reOrderPoint) {
                         $item->status = 'In Stock';
-                        $item->save();
                     }
+
                     if ($isItemForRoom) {
                         Unavailable::where('reservation_id', $reservation->id)->delete();
-                        $room->items()->updateExistingPivot($item->id, ['isBed' => false]);
+                        $room->items()->updateExistingPivot($item->id, ['isBed' => false, 'needStock' => 0]);
                     } else {
-                        $room->items()->detach($item->id);
+                        // $room->items()->detach($item->id);
                     }
+                    $item->save();
                 }
             }
 
@@ -745,13 +820,22 @@ class ReservationController extends Controller
             foreach ($cottages as $cottage) {
                 $items = $cottage->items;
                 foreach ($items as $item) {
+                    $isItemForCottage = array_reduce($item->categories->toArray(), function ($carry, $category) {
+                        return $carry && ($category['name'] === 'Cottage' || $category['name'] === 'Resort');
+                    }, true);
+
                     $pivot = $item->pivot;
-                    $item->currentQuantity += $pivot->quantity;
+                    $item->currentQuantity += $pivot->needStock !== 0 ? 0 : $pivot->quantity;
                     if ($item->currentQuantity > $item->reOrderPoint) {
                         $item->status = 'In Stock';
-                        $item->save();
                     }
-                    Unavailable::where('reservation_id', $reservation->id)->delete();
+                    if ($isItemForCottage) {
+                        Unavailable::where('reservation_id', $reservation->id)->delete();
+                        $cottage->items()->updateExistingPivot($item->id, ['needStock' => 0]);
+                    } else {
+                        $cottage->items()->detach($item->id);
+                    }
+                    $item->save();
                 }
             }
 
@@ -768,7 +852,9 @@ class ReservationController extends Controller
                 'refund' => number_format($refundAndPaid, 2),
             ];
             // Send cancellation email to customer
-            Mail::to($reservation->customer->email)->send(new CancelledReservationMail($cancelledEmailContent));
+            if (env('APP_PROD')) {
+                Mail::to($reservation->customer->email)->send(new CancelledReservationMail($cancelledEmailContent));
+            }
 
             $reservation->save();
 
@@ -953,6 +1039,14 @@ class ReservationController extends Controller
             }
         }
 
+        foreach ($cottageIds as $cottageId) {
+            $cottageFromReservation = Cottage::where('id', $cottageId)->first();
+            if ($cottageFromReservation->active === 0) {
+                $reserveCottageIds[] = $cottageFromReservation->id;
+                $reservedCottageNames[] = $cottageFromReservation->name;
+            }
+        }
+
         if (!empty($reserveCottageIds)) {
             if (count($cottageIds) === 1) {
                 return response()->json([
@@ -1006,6 +1100,15 @@ class ReservationController extends Controller
             }
         }
 
+
+        foreach ($roomIds as $roomId) {
+            $roomFromReservation = Room::where('id', $roomId)->first();
+            if ($roomFromReservation->active === 0) {
+                $reservedRoomIds[] = $roomFromReservation->id;
+                $reservedRoomNames[] = $roomFromReservation->name;
+            }
+        }
+
         // If any room is reserved
         if (!empty($reservedRoomIds)) {
             // If only one room is selected
@@ -1032,77 +1135,6 @@ class ReservationController extends Controller
         }
         // All rooms are available
         return false;
-    }
-
-    public function gcashPayment(Reservation $reservation)
-    {
-        try {
-            $user = Auth::user();
-            $gcashPayment = request()->gCashRefNumber;
-            $paid = request()->paid ?? 0;
-
-            if ($user) {
-                if ($paid) {
-                    $reservation->update(['paid' => $paid, 'balance' => 0]);
-                } else {
-                    $reservation->update(['gCashRefNumber' => $gcashPayment, 'paid' => $paid, 'balance' => 0]);
-                }
-            }
-
-            if (!$user) {
-                $reservation->update(['gCashRefNumber' => $gcashPayment]);
-                $recipient = $reservation->customer->email;
-                $arrivalTime = "2:00pm";
-                $departureTime = "12:00pm";
-                $arrivalDate = \Carbon\Carbon::parse($reservation->checkIn)->format('F j');
-                $departureDate = \Carbon\Carbon::parse($reservation->checkOut)->format('F j');
-                $emailContent = [
-                    'reservationHASH' => $reservation->reservationHASH,
-                    'arrivalDateTime' => "$arrivalDate at $arrivalTime",
-                    'departureDateTime' => "$departureDate at $departureTime",
-                    'total' => number_format($reservation->total, 2),
-                    'paid' => number_format($reservation->paid, 2),
-                    'balance' => number_format($reservation->balance, 2),
-                    'status' => $reservation->status,
-                    'customerName' => $reservation->customer->firstName . ' ' . $reservation->customer->lastName,
-                    'rooms' => $reservation->rooms,
-                    'cottages' => $reservation->cottages, //(optional),
-                    'rescheduleLink' => $this->generateTokenLinkForReschedule($reservation, $recipient)
-                ];
-                Mail::to($recipient)->send(new SuccessfulReservationWRescheduleMail($emailContent));
-
-                $frontDesksEmail = User::whereHas('roles', function ($query) {
-                    $query->where('roleName', 'Front Desk');
-                })->pluck('email');
-                $emailContentForAllFrontDesks = [
-                    'reservationHASH' => $emailContent['reservationHASH'],
-                    'arrivalDateTime' => "$arrivalDate at $arrivalTime",
-                    'departureDateTime' => "$departureDate at $departureTime",
-                    'email' => $recipient,
-                    'customerName' => $emailContent['customerName'],
-                    'rooms' => $emailContent['rooms'],
-                    'cottages' => $emailContent['cottages'], //(optional),
-                    'rescheduleLink' => $emailContent['rescheduleLink'],
-
-                    'total' => $emailContent['total'],
-                    'paid' => $emailContent['paid'],
-                    'balance' => $emailContent['balance'],
-                    'status' => $emailContent['status'],
-                ];
-                Mail::to($frontDesksEmail)->send(new SomeOneJustReservedMail($emailContentForAllFrontDesks));
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => $user ? 'Successfully Reserved!' : 'Your GCash payment is being processed. We will validate the GCash reference code shortly.'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-                'message' => 'An error occurred.'
-            ], 500);
-        }
     }
 
     #resched!
@@ -1160,13 +1192,17 @@ class ReservationController extends Controller
                 'balance' => number_format($reservation->balance, 2),
                 'email' => $email,
             ];
-            Mail::to($email)->send(new RescheduleMail($emailContent));
+            if (env('APP_PROD')) {
+                Mail::to($email)->send(new RescheduleMail($emailContent));
+            }
 
             $frontDesksEmail = User::whereHas('roles', function ($query) {
                 $query->where('roleName', 'Front Desk');
             })->pluck('email');
 
-            Mail::to($frontDesksEmail)->send(new RescheduleFrontDesksMail($emailContent));
+            if (env('APP_PROD')) {
+                Mail::to($frontDesksEmail)->send(new RescheduleFrontDesksMail($emailContent));
+            }
 
             // Return success response
             return response()->json([

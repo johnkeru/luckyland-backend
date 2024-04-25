@@ -33,18 +33,25 @@ class AddCottageRequest extends FormRequest
 
     protected function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
     {
-        $data['success'] = false;
-        $data['message'] = "Failed to add a new item.";
-        $data['errors'] = [];
+        $errors = [];
 
         foreach ($validator->errors()->messages() as $field => $messages) {
-            $data['errors'][] = [
-                'field' => $field,
-                'msg' => $messages[0]
-            ];
+            foreach ($messages as $message) {
+                // Add each error message to the errors array
+                $errors[] = [
+                    'field' => $field,
+                    'msg' => $message
+                ];
+            }
         }
+
+        // Throw the HTTP response exception with the desired JSON response
         throw new HttpResponseException(
-            response()->json($data, 422)
+            response()->json([
+                'success' => false,
+                'message' => 'Failed to add a new item.',
+                'errors' => $errors
+            ], 422)
         );
     }
 }

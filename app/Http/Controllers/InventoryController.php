@@ -546,33 +546,34 @@ class InventoryController extends Controller
 
 
 
+    // old version.
     // validation helper function
-    public function validateData(array $rules)
-    {
-        // $rules = [
-        //     'itemCode' => 'required|unique:items',
-        //     'name' => 'required',
-        //     'category' => 'required',
-        //     'quantity' => 'required|integer|min:1',
-        //     'maxQuantity' => 'required|integer|min:1',
-        //     'reOrderPoint' => 'required|integer|min:1',
-        //     'addedQuantity' => 'required|integer|min:1',
-        // ];
-        // $data = $this->validateData($rules);
-        $data['success'] = true;
-        $validator = Validator::make(request()->all(), $rules);
-        if ($validator->fails()) {
-            $data['success'] = false;
-            $data['errors'] = [];
-            foreach ($validator->errors()->messages() as $field => $messages) {
-                $data['errors'][] = [
-                    'field' => $field,
-                    'msg' => $messages[0]
-                ];
-            }
-            return $data;
-        }
-    }
+    // public function validateData(array $rules)
+    // {
+    //     // $rules = [
+    //     //     'itemCode' => 'required|unique:items',
+    //     //     'name' => 'required',
+    //     //     'category' => 'required',
+    //     //     'quantity' => 'required|integer|min:1',
+    //     //     'maxQuantity' => 'required|integer|min:1',
+    //     //     'reOrderPoint' => 'required|integer|min:1',
+    //     //     'addedQuantity' => 'required|integer|min:1',
+    //     // ];
+    //     // $data = $this->validateData($rules);
+    //     $data['success'] = true;
+    //     $validator = Validator::make(request()->all(), $rules);
+    //     if ($validator->fails()) {
+    //         $data['success'] = false;
+    //         $data['errors'] = [];
+    //         foreach ($validator->errors()->messages() as $field => $messages) {
+    //             $data['errors'][] = [
+    //                 'field' => $field,
+    //                 'msg' => $messages[0]
+    //             ];
+    //         }
+    //         return $data;
+    //     }
+    // }
 }
 
 

@@ -53,6 +53,7 @@ class ReservationAvailableCottagesResponse implements Responsable
                         return [
                             'id' => $item->id,
                             'name' => $item->name,
+                            'isOutOfStock' => $item->currentQuantity <= 3
                         ];
                     }),
                 ];
@@ -63,6 +64,7 @@ class ReservationAvailableCottagesResponse implements Responsable
                     'id' => $addOn->id,
                     'name' => $addOn->name,
                     'price' => $addOn->price,
+                    'isOutOfStock' => $addOn->currentQuantity <= 0
                 ];
             }),
         ];

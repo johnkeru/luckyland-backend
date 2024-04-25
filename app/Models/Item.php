@@ -87,11 +87,11 @@ class Item extends Model
     }
     function rooms()
     {
-        return $this->belongsToMany(Room::class)->withPivot(['minQuantity', 'maxQuantity', 'isBed']);
+        return $this->belongsToMany(Room::class)->withPivot(['minQuantity', 'maxQuantity', 'isBed', 'needStock']);
     }
     function cottages()
     {
-        return $this->belongsToMany(Cottage::class)->withPivot('quantity');
+        return $this->belongsToMany(Cottage::class)->withPivot(['quantity', 'needStock']);
     }
 
 

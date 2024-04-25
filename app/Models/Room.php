@@ -27,7 +27,7 @@ class Room extends Model
 
     function items()
     {
-        return $this->belongsToMany(Item::class)->withPivot(['minQuantity', 'maxQuantity', 'isBed']);
+        return $this->belongsToMany(Item::class)->withPivot(['minQuantity', 'maxQuantity', 'isBed', 'needStock']);
     }
 
     function roomType()

@@ -58,6 +58,7 @@ class ReservationSuggestionsResponse implements Responsable
                         return [
                             'id' => $item->id,
                             'name' => $item->name,
+                            'isOutOfStock' => $item->currentQuantity <= 3
                         ];
                     }),
                 ];
@@ -87,6 +88,7 @@ class ReservationSuggestionsResponse implements Responsable
                         return [
                             'id' => $item->id,
                             'name' => $item->name,
+                            'isOutOfStock' => $item->currentQuantity <= 3
                         ];
                     }),
                 ];
@@ -96,6 +98,7 @@ class ReservationSuggestionsResponse implements Responsable
                     'id' => $addOn->id,
                     'name' => $addOn->name,
                     'price' => $addOn->price,
+                    'isOutOfStock' => $addOn->currentQuantity <= 0,
                 ];
             }),
             'cottageAddOns' => $this->cottageAddOns->map(function ($addOn) {
@@ -103,6 +106,7 @@ class ReservationSuggestionsResponse implements Responsable
                     'id' => $addOn->id,
                     'name' => $addOn->name,
                     'price' => $addOn->price,
+                    'isOutOfStock' => $addOn->currentQuantity <= 0,
                 ];
             }),
         ];
