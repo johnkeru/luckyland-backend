@@ -8,15 +8,22 @@ use App\Http\Requests\AddRegularEmployeeRequest;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
 use App\Http\Responses\EmployeeIndexResponse;
+use App\Mail\ResetLinkMail;
 use App\Models\Address;
+use App\Models\ForgotPasswordToken;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+
 
 class UserController extends Controller
 {
@@ -92,7 +99,7 @@ class UserController extends Controller
             // Return successful login response
             return response()->json([
                 'success' => true,
-                'message' => 'User logged in successfully',
+                'message' => 'Welcome, ' . ucfirst($user->firstName) . '! You are now logged in.',
                 'data' => [
                     'user' => $user,
                     'token' => $user->createToken("API TOKEN")->plainTextToken
@@ -128,57 +135,107 @@ class UserController extends Controller
         }
     }
 
+    private function generateTokenLinkForReset($user)
+    {
+        $token = Str::random(60);
+        $expiry = Carbon::now()->addHour();
+        ForgotPasswordToken::create([
+            'token' => $token,
+            'expiry_time' => $expiry,
+            'user_id' => $user->id,
+        ]);
+        $frontendURL = env('FRONTEND_URL');
+        $link = URL::to("$frontendURL/password-reset/$token" . "?email=$user->email");
+        return $link;
+    }
+
     public function forgotPassword(Request $request)
     {
         $this->validateData([
             'email' => 'required|email',
         ]);
 
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
-
-        return $status === Password::RESET_LINK_SENT
-            ? response()->json([
-                'success' => true,
-                'message' => __($status),
-                'field' => "email",
-            ], 200)
-            : response()->json([
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return response()->json([
                 'success' => false,
-                'message' => __($status),
-                'field' => "email",
-            ], 400);
+                'message' => 'User not found.',
+                'field' => 'email',
+            ], 404);
+        }
+        $resetToken = $this->generateTokenLinkForReset($user);
+
+        $emailContent = [
+            'resetToken' => $resetToken,
+            'email' => $user->eamil
+        ];
+        Mail::to($request->email)->send(new ResetLinkMail($emailContent));
+        return response()->json([
+            'success' => true,
+            'message' => 'Password reset email sent successfully.',
+        ], 200);
     }
+
 
     public function resetPassword(Request $request)
     {
-        $this->validateData([
-            'email' => 'required|email',
+        $this->validate($request, [
             'token' => 'required|string',
-            'password' => 'required|string|confirmed|min:8',
+            'email' => 'required|email',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user, $password) {
-                $user->forceFill([
-                    'password' => Hash::make($password)
-                ])->save();
+        $token = $request->token;
+        $email = $request->email;
+        $password = $request->password;
 
-                event(new PasswordReset($user));
-            }
-        );
+        $user = User::where('email', $email)->first();
 
-        return $status === Password::PASSWORD_RESET
-            ? response()->json([
-                'success' => true,
-                'message' => __($status)
-            ], 200)
-            : response()->json([
+        if (!$user) {
+            return response()->json([
                 'success' => false,
-                'message' => __($status)
+                'message' => 'User not found.',
+                'field' => 'email',
+            ], 404);
+        }
+
+        $resetToken = ForgotPasswordToken::where('token', $token)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$resetToken) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired token.',
+                'field' => 'token',
             ], 400);
+        }
+
+        if (Carbon::now()->gt($resetToken->expiry_time)) {
+            // Token has expired
+            return response()->json([
+                'success' => false,
+                'message' => 'Token has expired.',
+                'field' => 'token',
+            ], 400);
+        }
+
+        // Update user's password
+        $user->password = Hash::make($password);
+        $user->save();
+
+        // Delete the used token
+        $resetToken->delete();
+
+        $user->tokens()->delete();
+
+        // Logout the user
+        Auth::logout();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password reset successful.',
+        ], 200);
     }
 
     public function index()

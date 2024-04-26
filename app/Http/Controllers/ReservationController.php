@@ -1183,7 +1183,7 @@ class ReservationController extends Controller
             $reservation->checkIn = $checkIn;
             $reservation->checkOut = $checkOut;
             $reservation->days = $days;
-            $reservation->total = ($reservation->totalRoomsPrice + $reservation->totalCottagesPrice) * $days;
+            $reservation->total = ($reservation->totalRoomsPrice + $reservation->totalCottagesPrice) * ($days ?? 1);
             $reservation->balance = $reservation->total - 500;
             $reservation->save();
 
