@@ -748,52 +748,50 @@ class ReservationController extends Controller
                 }
             }
 
-            if (!$id) {
-                $reservation->update(['gCashRefNumber' => $gcashPayment]);
-                $recipient = $reservation->customer->email;
-                $arrivalTime = "2:00pm";
-                $departureTime = "12:00pm";
-                $arrivalDate = \Carbon\Carbon::parse($reservation->checkIn)->format('F j');
-                $departureDate = \Carbon\Carbon::parse($reservation->checkOut)->format('F j');
-                $emailContent = [
-                    'reservationHASH' => $reservation->reservationHASH,
-                    'arrivalDateTime' => "$arrivalDate at $arrivalTime",
-                    'departureDateTime' => "$departureDate at $departureTime",
-                    'total' => number_format($reservation->total, 2),
-                    'paid' => number_format($reservation->paid, 2),
-                    'balance' => number_format($reservation->balance, 2),
-                    'status' => $reservation->status,
-                    'customerName' => $reservation->customer->firstName . ' ' . $reservation->customer->lastName,
-                    'rooms' => $reservation->rooms,
-                    'cottages' => $reservation->cottages, //(optional),
-                    'rescheduleLink' => $this->generateTokenLinkForReschedule($reservation, $recipient)
-                ];
-                if (env('APP_PROD')) {
-                    Mail::to($recipient)->send(new SuccessfulReservationWRescheduleMail($emailContent));
-                }
+            $reservation->update(['gCashRefNumber' => $gcashPayment]);
+            $recipient = $reservation->customer->email;
+            $arrivalTime = "2:00pm";
+            $departureTime = "12:00pm";
+            $arrivalDate = \Carbon\Carbon::parse($reservation->checkIn)->format('F j');
+            $departureDate = \Carbon\Carbon::parse($reservation->checkOut)->format('F j');
+            $emailContent = [
+                'reservationHASH' => $reservation->reservationHASH,
+                'arrivalDateTime' => "$arrivalDate at $arrivalTime",
+                'departureDateTime' => "$departureDate at $departureTime",
+                'total' => number_format($reservation->total, 2),
+                'paid' => number_format($reservation->paid, 2),
+                'balance' => number_format($reservation->balance, 2),
+                'status' => 'Approved',
+                'customerName' => $reservation->customer->firstName . ' ' . $reservation->customer->lastName,
+                'rooms' => $reservation->rooms,
+                'cottages' => $reservation->cottages, //(optional),
+                'rescheduleLink' => $this->generateTokenLinkForReschedule($reservation, $recipient)
+            ];
+            if (env('APP_PROD')) {
+                Mail::to($recipient)->send(new SuccessfulReservationWRescheduleMail($emailContent));
+            }
 
-                $frontDesksEmail = User::whereHas('roles', function ($query) {
-                    $query->where('roleName', 'Front Desk');
-                })->pluck('email');
-                $emailContentForAllFrontDesks = [
-                    'reservationHASH' => $emailContent['reservationHASH'],
-                    'arrivalDateTime' => "$arrivalDate at $arrivalTime",
-                    'departureDateTime' => "$departureDate at $departureTime",
-                    'email' => $recipient,
-                    'customerName' => $emailContent['customerName'],
-                    'rooms' => $emailContent['rooms'],
-                    'cottages' => $emailContent['cottages'], //(optional),
-                    'rescheduleLink' => $emailContent['rescheduleLink'],
+            $frontDesksEmail = User::whereHas('roles', function ($query) {
+                $query->where('roleName', 'Front Desk');
+            })->pluck('email');
+            $emailContentForAllFrontDesks = [
+                'reservationHASH' => $emailContent['reservationHASH'],
+                'arrivalDateTime' => "$arrivalDate at $arrivalTime",
+                'departureDateTime' => "$departureDate at $departureTime",
+                'email' => $recipient,
+                'customerName' => $emailContent['customerName'],
+                'rooms' => $emailContent['rooms'],
+                'cottages' => $emailContent['cottages'], //(optional),
+                'rescheduleLink' => $emailContent['rescheduleLink'],
 
-                    'total' => $emailContent['total'],
-                    'paid' => $emailContent['paid'],
-                    'balance' => $emailContent['balance'],
-                    'status' => $emailContent['status'],
-                ];
+                'total' => $emailContent['total'],
+                'paid' => $emailContent['paid'],
+                'balance' => $emailContent['balance'],
+                'status' => $emailContent['status'],
+            ];
 
-                if (env('APP_PROD')) {
-                    Mail::to($frontDesksEmail)->send(new SomeOneJustReservedMail($emailContentForAllFrontDesks));
-                }
+            if (env('APP_PROD')) {
+                Mail::to($frontDesksEmail)->send(new SomeOneJustReservedMail($emailContentForAllFrontDesks));
             }
             // END OF GCASH PAYMENT
 

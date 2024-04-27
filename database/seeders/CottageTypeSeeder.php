@@ -15,13 +15,13 @@ class CottageTypeSeeder extends Seeder
     {
         $cottageTypeData = [
             [
-                'description' => 'A spacious retreat with a capacity for 20 guests, ideal for gatherings and relaxation. Price: $3500.',
+                'description' => 'A spacious retreat with a capacity for 20 guests, ideal for gatherings and relaxation.',
                 'type' => $this->bigCottage,
                 'price' => 3500,
                 'capacity' => 20,
             ],
             [
-                'description' => "A cozy retreat designed for intimate getaways, accommodating up to 10 guests comfortably. Price: $2500.",
+                'description' => "A cozy retreat designed for intimate getaways, accommodating up to 10 guests comfortably.",
                 'type' => $this->smallCottage,
                 'price' =>  2500,
                 'capacity' => 10,

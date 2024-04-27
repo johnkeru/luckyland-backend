@@ -27,7 +27,7 @@ class UnavailableController extends Controller
                 ->orderByItemName($name)
                 ->orderByQuantity($quantity)
                 ->with(['item', 'item.categories'])
-                ->paginate(8);
+                ->paginate(7);
 
             return new UnavailableIndexResponse($unavailables);
         } catch (\Exception $e) {

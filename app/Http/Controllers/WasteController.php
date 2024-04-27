@@ -27,7 +27,7 @@ class WasteController extends Controller
                 ->orderByItemName($name)
                 ->orderByQuantity($quantity)
                 ->with(['item', 'item.categories'])
-                ->paginate(8);
+                ->paginate(7);
 
             return new WasteIndexResponse($wastes);
         } catch (\Exception $e) {

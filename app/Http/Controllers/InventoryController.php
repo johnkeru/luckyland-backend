@@ -14,7 +14,6 @@ use App\Models\EmployeeLogs;
 use App\Models\Item;
 use App\Models\Room;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 
 class InventoryController extends Controller
 {
