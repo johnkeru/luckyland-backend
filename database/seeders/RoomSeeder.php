@@ -77,19 +77,19 @@ class RoomSeeder extends Seeder
     {
         $images = [
             [
-                'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1712931182/pxm41t5ltg6j9grmujhp.webp',
+                'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1714146712/435150110_3673487429560716_1023056281452641595_n_thkyeo.jpg',
                 'room_id' => $room_id
             ],
             [
-                'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1712931580/lxebu5zmf93mcia0quen.webp',
+                'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1714146487/435010970_1760424487770875_441501228963471840_n_bx1szd.jpg',
                 'room_id' => $room_id
             ],
             [
-                'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1712931580/txyazkthaenzorqf39rm.webp',
+                'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1714146476/384173444_702795625027230_1127771356806399914_n_sn1zyw.jpg',
                 'room_id' => $room_id
             ],
             [
-                'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1712931581/bleghytopcm2l49bkatn.jpg',
+                'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1714146474/435068781_760031502899526_1012775348193875190_n_etul91.jpg',
                 'room_id' => $room_id
             ],
         ];

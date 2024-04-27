@@ -66,20 +66,20 @@
             <p><strong>Arrival Date and Time:</strong> {{ $data['arrivalDateTime'] }}</p>
             <p><strong>Departure Date and Time:</strong> {{ $data['departureDateTime'] }}</p>
 
-            @if (!empty($data['rooms']))
+            @if (isset($data['rooms']) && count($data['rooms']) > 0)
             <p><strong>Rooms:</strong></p>
             <ul>
                 @foreach($data['rooms'] as $room)
-                <li><strong>Name:</strong> {{ $room['name'] }}, <strong>Type:</strong> {{ $room['type'] }}</li>
+                <li><strong>Name:</strong> {{ $room['name'] }}, <strong>Type:</strong> {{ $room['roomType']['type'] }}</li>
                 @endforeach
             </ul>
             @endif
 
-            @if (!empty($data['cottages']))
+            @if (isset($data['cottages']) && count($data['cottages']) > 0)
             <p><strong>Cottages:</strong></p>
             <ul>
                 @foreach($data['cottages'] as $cottage)
-                <li><strong>Name:</strong> {{ $cottage['name'] }}, <strong>Type:</strong> {{ $cottage['type'] }}</li>
+                <li><strong>Name:</strong> {{ $cottage['name'] }}, <strong>Type:</strong> {{ $cottage['cottageType']['type'] }}</li>
                 @endforeach
             </ul>
             @endif

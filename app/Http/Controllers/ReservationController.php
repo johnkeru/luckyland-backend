@@ -10,6 +10,7 @@ use App\Http\Responses\ReservationSuggestionsResponse;
 use App\Mail\CancelledReservationMail;
 use App\Mail\RescheduleFrontDesksMail;
 use App\Mail\RescheduleMail;
+use App\Mail\ReservationStockNeedMail;
 use App\Mail\SomeOneJustReservedMail;
 use App\Mail\SuccessfulReservationWRescheduleMail;
 use App\Models\Address;
@@ -509,8 +510,15 @@ class ReservationController extends Controller
             $id = Auth::id();
             $validatedData = $request->validated();
 
-            $checkIn = $validatedData['checkIn'];
-            $checkOut = $validatedData['checkOut'];
+            $validatedData['checkIn'] = Carbon::parse($validatedData['checkIn'])->addDay()->toDateString();
+            $validatedData['checkOut'] = Carbon::parse($validatedData['checkOut'])->addDay()->toDateString();
+
+            $checkIn =  $validatedData['checkIn'];
+            $checkOut =  $validatedData['checkOut'];
+
+            // ITEMS FOR ROOMS INCASE THERE'S NO STOCK ANYMORE FOR CERTAIN AMENETIES
+            $roomsNeedStock = [];
+            $cottagesNeedStock = [];
 
             if (isset($validatedData['cottages'])) {
                 $cottageIds = array_column($validatedData['cottages'], 'id');
@@ -563,7 +571,6 @@ class ReservationController extends Controller
                         }
                     }
 
-                    // ITEMS FOR ROOMS
                     foreach ($room->items as $item) {
                         $pivot = $item->pivot;
                         if (!$pivot->isBed) { // if isBed is still false in pivot
@@ -574,6 +581,11 @@ class ReservationController extends Controller
                             } else {
                                 // left the currentQuantity as it is.
                                 $room->items()->updateExistingPivot($item->id, ['isBed' => $isBed, 'needStock' => $quantityToDeduct]);
+                                $roomsNeedStock[] = [
+                                    'room_name' => $room->name,
+                                    'item_name' => $item->name,
+                                    'quantity_need' => $quantityToDeduct
+                                ];
                             }
                             if ($item->currentQuantity !== 0 && $item->currentQuantity < $item->reOrderPoint) {
                                 $item->status = 'Low Stock';
@@ -616,13 +628,19 @@ class ReservationController extends Controller
                         }
                     }
 
+
                     foreach ($cottage->items as $item) {
                         $pivot = $item->pivot;
                         if ($item->currentQuantity >= $pivot->quantity) {
                             $item->currentQuantity -= $pivot->quantity;
                         } else {
                             // left the currentQuantity as it is.
-                            $cottage->items()->updateExistingPivot($item->id, ['needStock' => $quantityToDeduct]);
+                            $cottage->items()->updateExistingPivot($item->id, ['needStock' => $pivot->quantity]);
+                            $cottagesNeedStock[] = [
+                                'cottage_name' => $cottage->name,
+                                'item_name' => $item->name,
+                                'quantity_need' => $pivot->quantity
+                            ];
                         }
                         if ($item->currentQuantity !== 0 && $item->currentQuantity < $item->reOrderPoint) {
                             $item->status = 'Low Stock';
@@ -633,6 +651,21 @@ class ReservationController extends Controller
                     }
                 }
             }
+
+            // ONLY GETS TRIGGER IF ROOM, COTTAGE AMENETIES NEED STOCK.
+            if (!empty($roomsNeedStock) || !empty($cottagesNeedStock)) {
+                $roles = ['Admin', 'Inventory', 'Front Desk'];
+                $recipients = User::whereHas('roles', function ($query) use ($roles) {
+                    $query->whereIn('roleName', $roles);
+                })->pluck('email')->toArray();
+                // There is a need for stock in either rooms or cottages
+                $emailContent = [
+                    'roomsNeedStock' => $roomsNeedStock,
+                    'cottagesNeedStock' => $cottagesNeedStock,
+                ];
+                Mail::to($recipients)->send(new ReservationStockNeedMail($emailContent));
+            }
+
 
             $customer = Customer::create($validatedData['customer']);
             $address = new Address([
@@ -659,12 +692,14 @@ class ReservationController extends Controller
                     foreach ($items as $item) {
                         $pivot = $item->pivot;
                         $quantity = $pivot->isBed ? $pivot->maxQuantity : $pivot->minQuantity;
-                        Unavailable::create([
-                            'reservation_id' => $reservation->id,
-                            'item_id' => $item->id,
-                            'reason' => 'Reserved for guest' . ' ' . $customer->firstName . ' ' . $customer->lastName,
-                            'quantity' => $quantity,
-                        ]);
+                        if ($pivot->needStock === 0) { // need stock is only have value if no item in inventory anymore.
+                            Unavailable::create([
+                                'reservation_id' => $reservation->id,
+                                'item_id' => $item->id,
+                                'reason' => 'Reserved for guest' . ' ' . $customer->firstName . ' ' . $customer->lastName,
+                                'quantity' => $quantity,
+                            ]);
+                        }
                     }
                 }
             }
@@ -680,12 +715,14 @@ class ReservationController extends Controller
                     foreach ($items as $item) {
                         $pivot = $item->pivot;
                         $quantity = $pivot->quantity;
-                        Unavailable::create([
-                            'reservation_id' => $reservation->id,
-                            'item_id' => $item->id,
-                            'reason' => 'Reserved for guest' . ' ' . $customer->firstName . ' ' . $customer->lastName,
-                            'quantity' => $quantity,
-                        ]);
+                        if ($pivot->needStock === 0) {
+                            Unavailable::create([
+                                'reservation_id' => $reservation->id,
+                                'item_id' => $item->id,
+                                'reason' => 'Reserved for guest' . ' ' . $customer->firstName . ' ' . $customer->lastName,
+                                'quantity' => $quantity,
+                            ]);
+                        }
                     }
                 }
             }
@@ -903,16 +940,20 @@ class ReservationController extends Controller
 
                         if ($isItemOnlyForRoom) {
                             Unavailable::where('item_id', $item->id)->delete();  // --------------- ONLY DELETE THE ITEM FOR ROOMS NOT ADD ONS(THINGS)
-                            Waste::create([
-                                'quantity' => $pivot->isBed ? $pivot->maxQuantity : $pivot->minQuantity,
-                                'reservation_id' => $reservation->id,
-                                'item_id' => $item->id
-                            ]);
+                            if ($pivot->needStock === 0) {
+                                Waste::create([
+                                    'quantity' => $pivot->isBed ? $pivot->maxQuantity : $pivot->minQuantity,
+                                    'reservation_id' => $reservation->id,
+                                    'item_id' => $item->id
+                                ]);
+                            }
                             // $room->items()->updateExistingPivot($item->id, ['isBed' => false]);
                         } else {
-                            Unavailable::where('item_id', $item->id)->update([
-                                'reason' => "In use by guest " . $reservation->customer->firstName . ' ' . $reservation->customer->lastName
-                            ]);  // --------------- CHANGE THE REASON, BECAUSE IT'S NOW USE 
+                            if ($pivot->needStock === 0) {
+                                Unavailable::where('item_id', $item->id)->update([
+                                    'reason' => "In use by guest " . $reservation->customer->firstName . ' ' . $reservation->customer->lastName
+                                ]);  // --------------- CHANGE THE REASON, BECAUSE IT'S NOW USE 
+                            }
                         }
                     }
                 }
@@ -929,15 +970,19 @@ class ReservationController extends Controller
 
                         if ($isItemOnlyForCottage) {
                             Unavailable::where('item_id', $item->id)->delete();
-                            Waste::create([
-                                'quantity' => $pivot->quantity,
-                                'reservation_id' => $reservation->id,
-                                'item_id' => $item->id
-                            ]);
+                            if ($pivot->needStock === 0) {
+                                Waste::create([
+                                    'quantity' => $pivot->quantity,
+                                    'reservation_id' => $reservation->id,
+                                    'item_id' => $item->id
+                                ]);
+                            }
                         } else {
-                            Unavailable::where('item_id', $item->id)->update([
-                                'reason' => "In use by guest " . $reservation->customer->firstName . ' ' . $reservation->customer->lastName
-                            ]);
+                            if ($pivot->needStock === 0) {
+                                Unavailable::where('item_id', $item->id)->update([
+                                    'reason' => "In use by guest " . $reservation->customer->firstName . ' ' . $reservation->customer->lastName
+                                ]);
+                            }
                         }
                     }
                 }
@@ -1148,6 +1193,9 @@ class ReservationController extends Controller
             $email = request()->email;
             $days = request()->days;
             $accommodationType = request()->accommodationType;
+
+            $checkIn = Carbon::parse($checkIn)->addDay()->toDateString();
+            $checkOut = Carbon::parse($checkOut)->addDay()->toDateString();
 
             // Check if any of the parameters is missing
             if (!$reservationHASH || !$token || !$email || !$accommodationType) {
