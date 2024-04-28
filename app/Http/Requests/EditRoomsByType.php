@@ -24,10 +24,9 @@ class EditRoomsByType extends FormRequest
     {
         return [
             'origType' => 'nullable|string',
-            'type' => 'required|string',
+            'type' => 'required|string|unique:room_types,type',
             'price' => 'required|numeric|min:0',
-            'minCapacity' => 'required|integer|min:1',
-            'maxCapacity' => 'required|integer|min:1',
+            'capacity' => 'required|integer|min:1',
             'description' => 'nullable|string',
 
             'attributes' => 'nullable|array',
@@ -54,7 +53,7 @@ class EditRoomsByType extends FormRequest
         throw new HttpResponseException(
             response()->json([
                 'success' => false,
-                'message' => 'Failed to add a new item.',
+                'message' => 'Failed to add a new type.',
                 'errors' => $errors
             ], 422)
         );

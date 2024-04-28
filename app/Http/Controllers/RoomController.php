@@ -181,6 +181,8 @@ class RoomController extends Controller
             $id = Auth::id();
 
             $data = $request->validated();
+            $data['minCapacity'] = $data['capacity'];
+            $data['maxCapacity'] = $data['capacity'] + 2;
 
             $newAttributeIds = [];
             foreach ($data['attributes'] as $attr) {
@@ -225,8 +227,8 @@ class RoomController extends Controller
             $roomType->update([
                 'type' => $data['type'],
                 'price' => $data['price'],
-                'minCapacity' => $data['minCapacity'],
-                'maxCapacity' => $data['maxCapacity'],
+                'minCapacity' => $data['capacity'],
+                'maxCapacity' => $data['capacity'] + 2,
                 'description' => $data['description'],
             ]);
 
@@ -234,7 +236,7 @@ class RoomController extends Controller
                 $roomType->attributes()->attach($newAttributeIds);
             }
 
-            if ($roomType->minCapacity !== $data['minCapacity']) {
+            if ($roomType->minCapacity !== $data['capacity']) {
                 $rooms = $roomType->rooms;
                 foreach ($rooms as $room) {
                     $itemIds = Item::whereHas('categories', function ($query) {
@@ -244,8 +246,8 @@ class RoomController extends Controller
                     $itemRooms = [];
                     foreach ($itemIds as $itemId) {
                         $itemRooms[$itemId] = [
-                            'minQuantity' => $data['minCapacity'],
-                            'maxQuantity' => $data['maxCapacity'],
+                            'minQuantity' => $data['capacity'],
+                            'maxQuantity' => $data['capacity'] + 2,
                         ];
                     }
                     $room->items()->sync($itemRooms);
