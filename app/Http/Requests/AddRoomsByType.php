@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class EditRoomsByType extends FormRequest
+class AddRoomsByType extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,7 +24,7 @@ class EditRoomsByType extends FormRequest
     {
         return [
             'origType' => 'nullable|string',
-            'type' => 'required|string',
+            'type' => 'required|string|unique:room_types,type',
             'price' => 'required|numeric|min:0',
             'capacity' => 'required|integer|min:1',
             'description' => 'nullable|string',

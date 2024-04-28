@@ -19,8 +19,8 @@ class ItemSeeder extends Seeder
                 'price' => 25,
                 'description' => 'Bottled Water',
                 'status' => 'In Stock',
-                'maxQuantity' => 50,
-                'currentQuantity' => 50,
+                'maxQuantity' => 200,
+                'currentQuantity' => 200,
                 'reOrderPoint' => 20,
             ],
             [
@@ -28,8 +28,8 @@ class ItemSeeder extends Seeder
                 'price' => 15,
                 'description' => 'Laundry Detergent',
                 'status' => 'In Stock',
-                'maxQuantity' => 50,
-                'currentQuantity' => 50,
+                'maxQuantity' => 200,
+                'currentQuantity' => 200,
                 'reOrderPoint' => 20,
             ],
             [
@@ -37,8 +37,8 @@ class ItemSeeder extends Seeder
                 'price' => 8,
                 'description' => 'Disinfectant Spray',
                 'status' => 'In Stock',
-                'maxQuantity' => 50,
-                'currentQuantity' => 50,
+                'maxQuantity' => 200,
+                'currentQuantity' => 200,
                 'reOrderPoint' => 20,
             ],
         ];
@@ -53,8 +53,8 @@ class ItemSeeder extends Seeder
                 'price' => 20,
                 'description' => 'Soap',
                 'status' => 'In Stock',
-                'maxQuantity' => 50,
-                'currentQuantity' => 50,
+                'maxQuantity' => 200,
+                'currentQuantity' => 200,
                 'reOrderPoint' => 20,
             ],
             [
@@ -62,8 +62,8 @@ class ItemSeeder extends Seeder
                 'price' => 10,
                 'description' => 'Shampoo',
                 'status' => 'In Stock',
-                'maxQuantity' => 50,
-                'currentQuantity' => 50,
+                'maxQuantity' => 200,
+                'currentQuantity' => 200,
                 'reOrderPoint' => 20,
             ],
             [
@@ -71,8 +71,8 @@ class ItemSeeder extends Seeder
                 'price' => 12,
                 'description' => 'Toothbrush',
                 'status' => 'In Stock',
-                'maxQuantity' => 50,
-                'currentQuantity' => 50,
+                'maxQuantity' => 200,
+                'currentQuantity' => 200,
                 'reOrderPoint' => 20,
             ],
             [
@@ -80,8 +80,8 @@ class ItemSeeder extends Seeder
                 'price' => 20,
                 'description' => 'Toothpaste',
                 'status' => 'In Stock',
-                'maxQuantity' => 50,
-                'currentQuantity' => 50,
+                'maxQuantity' => 200,
+                'currentQuantity' => 200,
                 'reOrderPoint' => 20,
             ],
         ];
@@ -96,8 +96,8 @@ class ItemSeeder extends Seeder
                 'price' => 20,
                 'description' => 'towel',
                 'status' => 'In Stock',
-                'maxQuantity' => 50,
-                'currentQuantity' => 50,
+                'maxQuantity' => 200,
+                'currentQuantity' => 200,
                 'reOrderPoint' => 20,
             ],
             [
@@ -105,8 +105,8 @@ class ItemSeeder extends Seeder
                 'price' => 20,
                 'description' => 'towel',
                 'status' => 'In Stock',
-                'maxQuantity' => 50,
-                'currentQuantity' => 50,
+                'maxQuantity' => 200,
+                'currentQuantity' => 200,
                 'reOrderPoint' => 20,
             ],
         ];
@@ -118,11 +118,11 @@ class ItemSeeder extends Seeder
         $cottageAddOns = [
             [
                 'name' => 'Karaoke',
-                'price' => 50,
+                'price' => 200,
                 'description' => 'Just sing a long',
                 'status' => 'In Stock',
-                'maxQuantity' => 50,
-                'currentQuantity' => 50,
+                'maxQuantity' => 200,
+                'currentQuantity' => 200,
                 'reOrderPoint' => 20,
             ],
         ];
@@ -137,8 +137,8 @@ class ItemSeeder extends Seeder
                 'price' => 28,
                 'description' => 'comfortable to pee',
                 'status' => 'In Stock',
-                'maxQuantity' => 50,
-                'currentQuantity' => 50,
+                'maxQuantity' => 200,
+                'currentQuantity' => 200,
                 'reOrderPoint' => 20,
             ],
         ];
@@ -150,11 +150,11 @@ class ItemSeeder extends Seeder
         $bothAddOns = [
             [
                 'name' => 'Grill Grate',
-                'price' => 50,
+                'price' => 200,
                 'description' => '',
                 'status' => 'In Stock',
-                'maxQuantity' => 50,
-                'currentQuantity' => 50,
+                'maxQuantity' => 200,
+                'currentQuantity' => 200,
                 'reOrderPoint' => 20,
             ],
         ];

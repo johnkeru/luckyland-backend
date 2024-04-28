@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AddRoomRequest;
+use App\Http\Requests\AddRoomsByType;
 use App\Http\Requests\EditRoomsByType;
 use App\Http\Responses\AllRoomResponse;
 use App\Http\Responses\ReservationAvailableRoomsResponse;
@@ -39,12 +40,14 @@ class RoomController extends Controller
     public function landingAccommodations()
     {
         try {
-            $roomTypes = RoomType::with(['rooms.images', 'attributes'])->get();
+
+            $roomTypes = RoomType::has('rooms')->with(['rooms.images', 'attributes'])->get();
             $roomTypes->each(function ($roomType) {
                 $roomType->setRelation('rooms', $roomType->rooms->take(1));
             });
 
-            $cottageTypes = CottageType::with(['cottages.images', 'attributes'])->get();
+
+            $cottageTypes = CottageType::has('cottages')->with(['cottages.images', 'attributes'])->get();
             $cottageTypes->each(function ($cottageType) {
                 $cottageType->setRelation('cottages', $cottageType->cottages->take(1));
             });
@@ -175,7 +178,7 @@ class RoomController extends Controller
         }
     }
 
-    public function addRoomsByType(EditRoomsByType $request)
+    public function addRoomsByType(AddRoomsByType $request)
     {
         try {
             $id = Auth::id();
