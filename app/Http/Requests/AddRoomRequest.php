@@ -27,7 +27,15 @@ class AddRoomRequest extends FormRequest
             'description' => 'nullable|string',
             'active' => 'required|boolean',
             'images.*.url' => 'required|url',
+
+            'origType' => 'nullable|string',
             'type' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'capacity' => 'required|integer|min:1',
+            'description' => 'nullable|string',
+
+            'attributes' => 'nullable|array',
+            'attributes.*.name' => 'sometimes|required|string',
         ];
     }
 

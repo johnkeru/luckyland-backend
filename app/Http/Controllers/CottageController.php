@@ -71,10 +71,56 @@ class CottageController extends Controller
     {
         try {
             $id = Auth::id();
-
             $data = $request->validated();
+            $cottageType = CottageType::where('type', $data['origType'])->first();
 
-            $cottageType = CottageType::where('type', $data['type'])->first();
+            if (!$cottageType) {
+                $newAttributeIds = [];
+                foreach ($data['attributes'] as $attr) {
+                    $newAttribute = CottageAttribute::create(['type' => $data['type'], 'name' => $attr['name']]);
+                    $newAttributeIds[] = $newAttribute->id;
+                }
+                $cottageType = CottageType::create($data);
+                $cottageType->attributes()->attach($newAttributeIds);
+            } else {
+                if (isset($data['attributes'])) {
+                    $cottageType->attributes()->detach();
+
+                    CottageAttribute::where('type', $data['origType'])->delete();
+                    $newAttributeIds = [];
+                    // Delete existing attributes for the cottage's original type
+                    foreach ($data['attributes'] as $attr) {
+                        $newAttribute = CottageAttribute::create(['type' => $data['type'], 'name' => $attr['name']]);
+                        $newAttributeIds[] = $newAttribute->id;
+                    }
+                }
+                $cottageType->update([
+                    'type' => $data['type'],
+                    'price' => $data['price'],
+                    'capacity' => $data['capacity'],
+                    'description' => $data['description'],
+                ]);
+
+                $cottageType->attributes()->attach($newAttributeIds);
+
+                if ($cottageType->capacity !== $data['capacity']) {
+                    $cottages = $cottageType->cottages;
+                    foreach ($cottages as $cottage) {
+                        $itemIds = Item::whereHas('categories', function ($query) {
+                            $query->where('name', 'Cottage');
+                        })->pluck('id')->toArray();
+
+                        $itemCottages = [];
+                        foreach ($itemIds as $itemId) {
+                            $itemCottages[$itemId] = [
+                                'quantity' => $data['capacity'],
+                            ];
+                        }
+                        $cottage->items()->sync($itemCottages);
+                    }
+                }
+            }
+
             $data['cottage_type_id'] = $cottageType->id;
             $cottage = Cottage::create($data);
 
@@ -106,7 +152,7 @@ class CottageController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Successfully created a new cottage.'
+                'message' => 'Successfully added the new cottage.'
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -174,107 +220,6 @@ class CottageController extends Controller
                 'error' => $e->getMessage(),
                 'message' => 'An error occurred.'
             ];
-        }
-    }
-
-    public function addCottagesByType(EditCottagesByType $request)
-    {
-        try {
-            $id = Auth::id();
-
-            $data = $request->validated();
-
-            $newAttributeIds = [];
-            foreach ($data['attributes'] as $attr) {
-                $newAttribute = CottageAttribute::create(['type' => $data['type'], 'name' => $attr['name']]);
-                $newAttributeIds[] = $newAttribute->id;
-            }
-
-            $cottageType = CottageType::create($data);
-            $cottageType->attributes()->attach($newAttributeIds);
-
-            EmployeeLogs::create([
-                'action' => 'Added new cottage variant: ' . $data['type'],
-                'user_id' => $id,
-                'type' => 'add'
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Successfully added new type'
-            ]);
-        } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'error' => $e->getMessage(),
-                'message' => 'Failed to add new type'
-            ];
-        }
-    }
-
-    public function updateCottagesByType(EditCottagesByType $request)
-    {
-        try {
-            $id = Auth::id();
-
-            $data = $request->validated();
-            $cottageType = CottageType::where('type', $data['origType'])->first();
-            if (isset($data['attributes'])) {
-                $cottageType->attributes()->detach();
-
-                CottageAttribute::where('type', $data['origType'])->delete();
-                $newAttributeIds = [];
-                // Delete existing attributes for the cottage's original type
-                foreach ($data['attributes'] as $attr) {
-                    $newAttribute = CottageAttribute::create(['type' => $data['type'], 'name' => $attr['name']]);
-                    $newAttributeIds[] = $newAttribute->id;
-                }
-            }
-
-            $cottageType->update([
-                'type' => $data['type'],
-                'price' => $data['price'],
-                'capacity' => $data['capacity'],
-                'description' => $data['description'],
-            ]);
-
-            if (isset($data['attributes'])) {
-                $cottageType->attributes()->attach($newAttributeIds);
-            }
-
-            if ($cottageType->capacity !== $data['capacity']) {
-                $cottages = $cottageType->cottages;
-                foreach ($cottages as $cottage) {
-                    $itemIds = Item::whereHas('categories', function ($query) {
-                        $query->where('name', 'Cottage');
-                    })->pluck('id')->toArray();
-
-                    $itemCottages = [];
-                    foreach ($itemIds as $itemId) {
-                        $itemCottages[$itemId] = [
-                            'quantity' => $data['capacity'],
-                        ];
-                    }
-                    $cottage->items()->sync($itemCottages);
-                }
-            }
-
-            EmployeeLogs::create([
-                'action' => 'Updated cottage variant to: ' . $cottageType->type,
-                'user_id' => $id,
-                'type' => 'update'
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'All ' . $data['origType'] . ' cottages updated successfully.'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-                'message' => 'Failed to update cottages'
-            ]);
         }
     }
 }

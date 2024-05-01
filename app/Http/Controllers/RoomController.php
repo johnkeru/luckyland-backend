@@ -83,14 +83,71 @@ class RoomController extends Controller
         }
     }
 
+
+
+
     public function addRoom(AddRoomRequest $request)
     {
         try {
             $id = Auth::id();
-
             $data = $request->validated();
+            $roomType = RoomType::where('type', $data['origType'])->first(); // orig type because the type could change when editing.
+            if (!$roomType) {
+                $data = $request->validated();
+                $data['minCapacity'] = $data['capacity'];
+                $data['maxCapacity'] = $data['capacity'] + 2;
 
-            $roomType = RoomType::where('type', $data['type'])->first();
+                $newAttributeIds = [];
+                foreach ($data['attributes'] as $attr) {
+                    $newAttribute = RoomAttribute::create(['type' => $data['type'], 'name' => $attr['name']]);
+                    $newAttributeIds[] = $newAttribute->id;
+                }
+
+                $roomType = RoomType::create($data);
+                $roomType->attributes()->attach($newAttributeIds);
+            } else { // updated new type
+                if (isset($data['attributes'])) {
+                    $roomType->attributes()->detach();
+
+                    RoomAttribute::where('type', $data['origType'])->delete();
+                    $newAttributeIds = [];
+                    // Delete existing attributes for the room's original type
+                    foreach ($data['attributes'] as $attr) {
+                        $newAttribute = RoomAttribute::create(['type' => $data['type'], 'name' => $attr['name']]);
+                        $newAttributeIds[] = $newAttribute->id;
+                    }
+                }
+
+                $roomType->update([
+                    'type' => $data['type'],
+                    'price' => $data['price'],
+                    'minCapacity' => $data['capacity'],
+                    'maxCapacity' => $data['capacity'] + 2,
+                    'description' => $data['description'],
+                ]);
+
+                $roomType->attributes()->attach($newAttributeIds);
+
+                if ($roomType->minCapacity !== $data['capacity']) {
+                    $rooms = $roomType->rooms;
+                    foreach ($rooms as $room) {
+                        $itemIds = Item::whereHas('categories', function ($query) {
+                            $query->where('name', 'Room');
+                        })->pluck('id')->toArray();
+
+                        $itemRooms = [];
+                        foreach ($itemIds as $itemId) {
+                            $itemRooms[$itemId] = [
+                                'minQuantity' => $data['capacity'],
+                                'maxQuantity' => $data['capacity'] + 2,
+                            ];
+                        }
+                        $room->items()->sync($itemRooms);
+                    }
+                }
+            }
+
+
             $data['room_type_id'] = $roomType->id;
             $room = Room::create($data);
 
@@ -121,8 +178,7 @@ class RoomController extends Controller
                 'type' => 'add'
             ]);
 
-
-            return response()->json(['success' => true, 'message' => 'Successfully created a new room.']);
+            return response()->json(['success' => true, 'message' => 'Successfully added the new room.']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'An error occured.', 'error' => $e->getMessage()], 500);
         }
@@ -132,27 +188,66 @@ class RoomController extends Controller
     {
         try {
             $id = Auth::id();
-
             $data = $request->validated();
-            if ($room->roomType->type !== $data['type']) {
-                $newRoomType = RoomType::where('type', $data['type'])->first();
-                $data['room_type_id'] = $newRoomType->id;
+            $roomType = RoomType::where('type', $data['origType'])->first(); // orig type because the type could change when editing.
+            if (!$roomType) {
+                $data = $request->validated();
+                $data['minCapacity'] = $data['capacity'];
+                $data['maxCapacity'] = $data['capacity'] + 2;
 
-                $itemIds = Item::whereHas('categories', function ($query) {
-                    $query->where('name', 'Room');
-                })->pluck('id')->toArray();
-
-                $itemRooms = [];
-                foreach ($itemIds as $itemId) {
-                    $itemRooms[$itemId] = [
-                        'minQuantity' => $newRoomType->minCapacity,
-                        'maxQuantity' => $newRoomType->maxCapacity,
-                    ];
+                $newAttributeIds = [];
+                foreach ($data['attributes'] as $attr) {
+                    $newAttribute = RoomAttribute::create(['type' => $data['type'], 'name' => $attr['name']]);
+                    $newAttributeIds[] = $newAttribute->id;
                 }
-                $room->items()->sync($itemRooms);
-            }
-            $room->update($data);
 
+                $roomType = RoomType::create($data);
+                $roomType->attributes()->attach($newAttributeIds);
+            } else { // updated new type
+                if (isset($data['attributes'])) {
+                    $roomType->attributes()->detach();
+
+                    RoomAttribute::where('type', $data['origType'])->delete();
+                    $newAttributeIds = [];
+                    // Delete existing attributes for the room's original type
+                    foreach ($data['attributes'] as $attr) {
+                        $newAttribute = RoomAttribute::create(['type' => $data['type'], 'name' => $attr['name']]);
+                        $newAttributeIds[] = $newAttribute->id;
+                    }
+                }
+
+                $roomType->update([
+                    'type' => $data['type'],
+                    'price' => $data['price'],
+                    'minCapacity' => $data['capacity'],
+                    'maxCapacity' => $data['capacity'] + 2,
+                    'description' => $data['description'],
+                ]);
+
+                $roomType->attributes()->attach($newAttributeIds);
+
+                if ($roomType->minCapacity !== $data['capacity']) {
+                    $rooms = $roomType->rooms;
+                    foreach ($rooms as $room) {
+                        $itemIds = Item::whereHas('categories', function ($query) {
+                            $query->where('name', 'Room');
+                        })->pluck('id')->toArray();
+
+                        $itemRooms = [];
+                        foreach ($itemIds as $itemId) {
+                            $itemRooms[$itemId] = [
+                                'minQuantity' => $data['capacity'],
+                                'maxQuantity' => $data['capacity'] + 2,
+                            ];
+                        }
+                        $room->items()->sync($itemRooms);
+                    }
+                }
+            }
+
+
+            $data['room_type_id'] = $roomType->id;
+            $room->update($data);
             $room->images()->delete(); // Delete existing images
             $room->images()->createMany($data['images']); // Create new images
 
@@ -173,97 +268,6 @@ class RoomController extends Controller
         try {
             $roomTypes = RoomType::withCount('rooms')->get();
             return new RoomTypesResponse($roomTypes);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'An error occured.', 'error' => $e->getMessage()], 500);
-        }
-    }
-
-    public function addRoomsByType(AddRoomsByType $request)
-    {
-        try {
-            $id = Auth::id();
-
-            $data = $request->validated();
-            $data['minCapacity'] = $data['capacity'];
-            $data['maxCapacity'] = $data['capacity'] + 2;
-
-            $newAttributeIds = [];
-            foreach ($data['attributes'] as $attr) {
-                $newAttribute = RoomAttribute::create(['type' => $data['type'], 'name' => $attr['name']]);
-                $newAttributeIds[] = $newAttribute->id;
-            }
-
-            $roomType = RoomType::create($data);
-            $roomType->attributes()->attach($newAttributeIds);
-
-            EmployeeLogs::create([
-                'action' => 'Added new room variant: ' . $data['type'],
-                'user_id' => $id,
-                'type' => 'add'
-            ]);
-
-            return response()->json(['success' => true, 'message' => 'Successfully added new type']);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'An error occured.', 'error' => $e->getMessage()], 500);
-        }
-    }
-
-    public function updateRoomsByType(EditRoomsByType $request)
-    {
-        try {
-            $id = Auth::id();
-
-            $data = $request->validated();
-            $roomType = RoomType::where('type', $data['origType'])->first();
-            if (isset($data['attributes'])) {
-                $roomType->attributes()->detach();
-
-                RoomAttribute::where('type', $data['origType'])->delete();
-                $newAttributeIds = [];
-                // Delete existing attributes for the room's original type
-                foreach ($data['attributes'] as $attr) {
-                    $newAttribute = RoomAttribute::create(['type' => $data['type'], 'name' => $attr['name']]);
-                    $newAttributeIds[] = $newAttribute->id;
-                }
-            }
-
-            $roomType->update([
-                'type' => $data['type'],
-                'price' => $data['price'],
-                'minCapacity' => $data['capacity'],
-                'maxCapacity' => $data['capacity'] + 2,
-                'description' => $data['description'],
-            ]);
-
-            if (isset($data['attributes'])) {
-                $roomType->attributes()->attach($newAttributeIds);
-            }
-
-            if ($roomType->minCapacity !== $data['capacity']) {
-                $rooms = $roomType->rooms;
-                foreach ($rooms as $room) {
-                    $itemIds = Item::whereHas('categories', function ($query) {
-                        $query->where('name', 'Room');
-                    })->pluck('id')->toArray();
-
-                    $itemRooms = [];
-                    foreach ($itemIds as $itemId) {
-                        $itemRooms[$itemId] = [
-                            'minQuantity' => $data['capacity'],
-                            'maxQuantity' => $data['capacity'] + 2,
-                        ];
-                    }
-                    $room->items()->sync($itemRooms);
-                }
-            }
-
-            EmployeeLogs::create([
-                'action' => 'Updated room variant to: ' . $roomType->type,
-                'user_id' => $id,
-                'type' => 'update'
-            ]);
-
-            return response()->json(['success' => true, 'message' => 'All ' . $data['origType'] . ' rooms updated successfully.']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'An error occured.', 'error' => $e->getMessage()], 500);
         }

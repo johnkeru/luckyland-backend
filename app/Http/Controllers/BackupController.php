@@ -4,11 +4,25 @@ namespace App\Http\Controllers;
 
 use App\Http\Responses\BackupIndexResponse;
 use App\Models\Backup;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use ZipArchive;
 
 class BackupController extends Controller
 {
+
+    public function backupv2()
+    {
+        // Call the Artisan command
+        Artisan::call('backup:run');
+
+        // Get the output of the command
+        $output = Artisan::output();
+
+        // You can do something with the output if needed
+        // For example, you can return it to the user
+        return response()->json(['message' => 'Backup completed.', 'output' => $output]);
+    }
 
     public function index()
     {

@@ -17,10 +17,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('hi', function () {
     return response()->json([
-        'data' => 'aehwfawef',
+        'data' => 'the developer of this api is awesome!',
     ]);
 });
 
+// Route::get('testing', [BackupController::class, 'backupv2']);
 
 
 
