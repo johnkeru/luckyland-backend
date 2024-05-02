@@ -7,6 +7,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\EmployeeLogsController;
+use App\Http\Controllers\FAQController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\RoomController;
@@ -21,9 +22,10 @@ Route::get('hi', function () {
     ]);
 });
 
-// Route::get('testing', [BackupController::class, 'backupv2']);
-
-
+Route::get('faqs', [FAQController::class, 'index']);
+Route::post('faqs', [FAQController::class, 'question']);
+Route::get('settings/faqs', [FAQController::class, 'noAnswersFAQs']);
+Route::post('settings/faqs/{faq}/answer', [FAQController::class, 'answer']);
 
 Route::prefix('landing')->group(function () {
     Route::get('accommodations', [RoomController::class, 'landingAccommodations']);
@@ -138,13 +140,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::prefix('rooms')->group(function () {
             Route::post('add-room', [RoomController::class, 'addRoom']);
             Route::put('update-room/{room}', [RoomController::class, 'updateRoom']);
-            Route::post('add-room-type', [RoomController::class, 'addRoomsByType']);
+            // Route::post('add-room-type', [RoomController::class, 'addRoomsByType']);
             Route::put('update-rooms-by-type', [RoomController::class, 'updateRoomsByType']);
         });
         Route::prefix('cottages')->group(function () {
             Route::post('add-cottage', [CottageController::class, 'addCottage']);
             Route::put('update-cottage/{cottage}', [CottageController::class, 'updateCottage']);
-            Route::post('add-cottage-type', [CottageController::class, 'addCottagesByType']);
+            // Route::post('add-cottage-type', [CottageController::class, 'addCottagesByType']);
             Route::put('update-cottages-by-type', [CottageController::class, 'updateCottagesByType']);
         });
     });
