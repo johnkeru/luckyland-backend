@@ -279,12 +279,13 @@ class RoomController extends Controller
             $id = Auth::id();
             $data = $request->validated();
             $roomType = RoomType::where('type', $data['origType'])->first(); // orig type because the type could change when editing.
+            $newAttributeIds = [];
+
             if (!$roomType) {
                 $data = $request->validated();
                 $data['minCapacity'] = $data['capacity'];
                 $data['maxCapacity'] = $data['capacity'] + 2;
 
-                $newAttributeIds = [];
                 foreach ($data['attributes'] as $attr) {
                     $newAttribute = RoomAttribute::create(['type' => $data['type'], 'name' => $attr['name']]);
                     $newAttributeIds[] = $newAttribute->id;
@@ -297,7 +298,6 @@ class RoomController extends Controller
                     $roomType->attributes()->detach();
 
                     RoomAttribute::where('type', $data['origType'])->delete();
-                    $newAttributeIds = [];
                     // Delete existing attributes for the room's original type
                     foreach ($data['attributes'] as $attr) {
                         $newAttribute = RoomAttribute::create(['type' => $data['type'], 'name' => $attr['name']]);

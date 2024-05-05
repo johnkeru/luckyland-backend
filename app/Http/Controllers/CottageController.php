@@ -263,9 +263,9 @@ class CottageController extends Controller
             $id = Auth::id();
             $data = $request->validated();
             $cottageType = CottageType::where('type', $data['origType'])->first();
+            $newAttributeIds = [];
 
             if (!$cottageType) {
-                $newAttributeIds = [];
                 foreach ($data['attributes'] as $attr) {
                     $newAttribute = CottageAttribute::create(['type' => $data['type'], 'name' => $attr['name']]);
                     $newAttributeIds[] = $newAttribute->id;
@@ -277,7 +277,6 @@ class CottageController extends Controller
                     $cottageType->attributes()->detach();
 
                     CottageAttribute::where('type', $data['origType'])->delete();
-                    $newAttributeIds = [];
                     // Delete existing attributes for the cottage's original type
                     foreach ($data['attributes'] as $attr) {
                         $newAttribute = CottageAttribute::create(['type' => $data['type'], 'name' => $attr['name']]);
