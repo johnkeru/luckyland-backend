@@ -17,7 +17,7 @@ class FAQSeeder extends Seeder
             FAQ::create([
                 'question' => fake()->sentence,
                 'answer' => fake()->paragraph,
-                'email' => fake()->optional()->email, // Optionally include email
+                'email' => fake()->email, // Optionally include email
                 'display' => fake()->boolean()
             ]);
         }

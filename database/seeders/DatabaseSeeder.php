@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
                 'lastName' => 'Trinanes',
                 // 'email' => 'amytrinanes143@gmail.com',
                 // 'email' => 'jrquerobin@forbescollege.org',
-                'email' => 'keru@gmail.com',
+                'email' => 'jrquerobin@forbescollege.org',
                 'phoneNumber' => '09123456789',
                 'graduated_at' => 'Bicol University',
                 'description' => "Meet the visionary owner of Luckyland Resort, a hospitality enthusiast with a passion for creating unforgettable experiences. With a keen eye for detail and a commitment to excellence, they ensure that every guest at Luckyland Resort is treated to a world-class stay. From luxurious accommodations to top-notch amenities, the owner's dedication to hospitality shines through, making",

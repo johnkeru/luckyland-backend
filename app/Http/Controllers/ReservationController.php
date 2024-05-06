@@ -13,6 +13,7 @@ use App\Mail\RescheduleMail;
 use App\Mail\ReservationStockNeedMail;
 use App\Mail\SomeOneJustReservedMail;
 use App\Mail\SuccessfulReservationWRescheduleMail;
+use App\Mail\CustomerDepartedMail;
 use App\Models\Address;
 use App\Models\Cottage;
 use App\Models\Customer;
@@ -990,6 +991,19 @@ class ReservationController extends Controller
                 $reservation->actualCheckOut = now();
                 // add ons item should go back to inventory
                 $rooms = $reservation->rooms;
+
+                $departureMailContent = [
+                    'rooms' => $rooms,
+                    'customerName' => $reservation->customer->firstName . ' ' . $reservation->customer->lastName,
+                    'email' => $reservation->customer->email,
+                ];
+                // CustomerDepartedMail
+                $houseKeeperEmails = User::whereHas('roles', function ($query) {
+                    $query->where('roleName', 'House Keeping');
+                })->pluck('email');
+
+                Mail::to($houseKeeperEmails)->send(new CustomerDepartedMail($departureMailContent));
+
                 foreach ($rooms as $room) {
                     $items = $room->items;
                     foreach ($items as $item) {
