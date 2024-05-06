@@ -1026,8 +1026,8 @@ class ReservationController extends Controller
                             $item->save();
                             $room->items()->detach($item->id);
                         }
+                        $room->items()->updateExistingPivot($item->id, ['isBed' => false]);
                     }
-                    $room->items()->updateExistingPivot($item->id, ['isBed' => false]);
                     // $room->update(['active' => false]);        // !turns false because the rooms used will be clean first.
                 }
 
