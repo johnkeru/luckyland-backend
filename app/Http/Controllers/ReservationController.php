@@ -2,18 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\Reservation\CustomerDeparture;
+use App\Events\Reservation\CustomerJustReserved;
+use App\Events\Reservation\RescheduledReservation;
+use App\Events\Reservation\ReservationCancelled;
 use App\Http\Requests\AddReservationRequest;
 use App\Http\Responses\ReservationAvailableCottagesResponse;
 use App\Http\Responses\ReservationAvailableRoomsResponse;
-use App\Http\Responses\ReservationIndexResponse;
 use App\Http\Responses\ReservationSuggestionsResponse;
-use App\Mail\CancelledReservationMail;
-use App\Mail\RescheduleFrontDesksMail;
-use App\Mail\RescheduleMail;
+use App\Interfaces\Reservation\ReservationInterface;
 use App\Mail\ReservationStockNeedMail;
-use App\Mail\SomeOneJustReservedMail;
-use App\Mail\SuccessfulReservationWRescheduleMail;
-use App\Mail\CustomerDepartedMail;
 use App\Models\Address;
 use App\Models\Cottage;
 use App\Models\Customer;
@@ -25,47 +23,23 @@ use App\Models\Room;
 use App\Models\Unavailable;
 use App\Models\User;
 use App\Models\Waste;
+use App\Traits\ReservationTrait;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\URL;
+
 
 class ReservationController extends Controller
 {
+    use ReservationTrait;
+
+    public function __construct(public ReservationInterface $reservationRepository)
+    {
+    }
+
     public function index()
     {
-        try {
-            $search = request()->query('search');
-
-            $room = request()->query('room');
-            $cottage = request()->query('cottage');
-            $status = request()->query('status');
-            $month = request()->query('month');
-
-            $reservation = Reservation::search($search)
-                ->latest()
-                ->filterByRoom($room)
-                ->filterByCottage($cottage)
-                ->filterByStatus($status)
-                ->filterByMonth($month)
-                ->with(['rooms', 'cottages', 'customer', 'customer.address'])
-                ->paginate(8);
-
-            $counts = [
-                'Approved' => Reservation::where('status', 'Approved')->count(),
-                'Cancelled' => Reservation::where('status', 'Cancelled')->count(),
-                'Departed' => Reservation::where('status', 'Departed')->count(),
-                'In Resort' => Reservation::where('status', 'In Resort')->count(),
-            ];
-            return new ReservationIndexResponse($reservation, $counts);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-                'message' => 'An error occurred. Please try again later or contact support.'
-            ], 500);
-        }
+        return $this->reservationRepository->index();
     }
 
     public function getOptionsForRoomsAndCottages()
@@ -504,7 +478,7 @@ class ReservationController extends Controller
     }
 
 
-    public function customerCreateReservation(AddReservationRequest $request)
+    public function customerCreateReservation(AddReservationRequest $request): \Illuminate\Http\JsonResponse
     {
         try {
 
@@ -576,7 +550,7 @@ class ReservationController extends Controller
                         $pivot = $item->pivot;
                         if (!$pivot->isBed) { // if isBed is still false in pivot
                             $quantityToDeduct = $isBed ? $pivot->maxQuantity : $pivot->minQuantity;
-                            if ($item->currentQuantity >= $quantityToDeduct) { // if currentQuantity below quantityToDeduct then don't allow it to deduct anymore as it will go currentQuantity to negative!. 
+                            if ($item->currentQuantity >= $quantityToDeduct) { // if currentQuantity below quantityToDeduct then don't allow it to deduct anymore as it will go currentQuantity to negative!.
                                 $item->currentQuantity -= $quantityToDeduct;
                                 $room->items()->updateExistingPivot($item->id, ['isBed' => $isBed]);
                             } else {
@@ -749,51 +723,9 @@ class ReservationController extends Controller
                 }
             }
 
+            CustomerJustReserved::dispatch($reservation); // trigger event when someone reserved.
+
             $reservation->update(['gCashRefNumber' => $gcashPayment]);
-            $recipient = $reservation->customer->email;
-            $arrivalTime = "2:00pm";
-            $departureTime = "12:00pm";
-            $arrivalDate = \Carbon\Carbon::parse($reservation->checkIn)->format('F j');
-            $departureDate = \Carbon\Carbon::parse($reservation->checkOut)->format('F j');
-            $emailContent = [
-                'reservationHASH' => $reservation->reservationHASH,
-                'arrivalDateTime' => "$arrivalDate at $arrivalTime",
-                'departureDateTime' => "$departureDate at $departureTime",
-                'total' => number_format($reservation->total, 2),
-                'paid' => number_format($reservation->paid, 2),
-                'balance' => number_format($reservation->balance, 2),
-                'status' => 'Approved',
-                'customerName' => $reservation->customer->firstName . ' ' . $reservation->customer->lastName,
-                'rooms' => $reservation->rooms,
-                'cottages' => $reservation->cottages, //(optional),
-                'rescheduleLink' => $this->generateTokenLinkForReschedule($reservation, $recipient)
-            ];
-            if (env('APP_PROD')) {
-                Mail::to($recipient)->send(new SuccessfulReservationWRescheduleMail($emailContent));
-            }
-
-            $frontDesksEmail = User::whereHas('roles', function ($query) {
-                $query->where('roleName', 'Front Desk');
-            })->pluck('email');
-            $emailContentForAllFrontDesks = [
-                'reservationHASH' => $emailContent['reservationHASH'],
-                'arrivalDateTime' => "$arrivalDate at $arrivalTime",
-                'departureDateTime' => "$departureDate at $departureTime",
-                'email' => $recipient,
-                'customerName' => $emailContent['customerName'],
-                'rooms' => $emailContent['rooms'],
-                'cottages' => $emailContent['cottages'], //(optional),
-                'rescheduleLink' => $emailContent['rescheduleLink'],
-
-                'total' => $emailContent['total'],
-                'paid' => $emailContent['paid'],
-                'balance' => $emailContent['balance'],
-                'status' => $emailContent['status'],
-            ];
-
-            if (env('APP_PROD')) {
-                Mail::to($frontDesksEmail)->send(new SomeOneJustReservedMail($emailContentForAllFrontDesks));
-            }
             // END OF GCASH PAYMENT
 
             return response()->json([
@@ -809,7 +741,7 @@ class ReservationController extends Controller
         }
     }
 
-    public function cancelReservation(Reservation $reservation)
+    public function cancelReservation(Reservation $reservation): \Illuminate\Http\JsonResponse
     {
         try {
             $id = Auth::id();
@@ -845,8 +777,6 @@ class ReservationController extends Controller
                     if ($isItemForRoom) {
                         Unavailable::where('reservation_id', $reservation->id)->delete();
                         $room->items()->updateExistingPivot($item->id, ['isBed' => false, 'needStock' => 0]);
-                    } else {
-                        // $room->items()->detach($item->id);
                     }
                     $item->save();
                 }
@@ -883,14 +813,7 @@ class ReservationController extends Controller
             $reservation->refund = $refundAndPaid;
             $reservation->paid  = $refundAndPaid;
 
-            $cancelledEmailContent = [
-                'name' => $reservation->customer->firstName . ' ' . $reservation->customer->lastName,
-                'refund' => number_format($refundAndPaid, 2),
-            ];
-            // Send cancellation email to customer
-            if (env('APP_PROD')) {
-                Mail::to($reservation->customer->email)->send(new CancelledReservationMail($cancelledEmailContent));
-            }
+            ReservationCancelled::dispatch($reservation); // trigger when cancelled.
 
             $reservation->save();
 
@@ -951,7 +874,7 @@ class ReservationController extends Controller
                             if ($pivot->needStock === 0) {
                                 Unavailable::where('item_id', $item->id)->update([
                                     'reason' => "In use by guest " . $reservation->customer->firstName . ' ' . $reservation->customer->lastName
-                                ]);  // --------------- CHANGE THE REASON, BECAUSE IT'S NOW USE 
+                                ]);  // --------------- CHANGE THE REASON, BECAUSE IT'S NOW USE
                             }
                         }
                     }
@@ -992,17 +915,7 @@ class ReservationController extends Controller
                 // add ons item should go back to inventory
                 $rooms = $reservation->rooms;
 
-                $departureMailContent = [
-                    'rooms' => $rooms,
-                    'customerName' => $reservation->customer->firstName . ' ' . $reservation->customer->lastName,
-                    'email' => $reservation->customer->email,
-                ];
-                // CustomerDepartedMail
-                $houseKeeperEmails = User::whereHas('roles', function ($query) {
-                    $query->where('roleName', 'House Keeping');
-                })->pluck('email');
-
-                Mail::to($houseKeeperEmails)->send(new CustomerDepartedMail($departureMailContent));
+                CustomerDeparture::dispatch($reservation); // notify housekeeper to clean the room.
 
                 foreach ($rooms as $room) {
                     $items = $room->items;
@@ -1072,128 +985,6 @@ class ReservationController extends Controller
         }
     }
 
-
-    private function validateCottageAvailability($cottageIds, $checkIn, $checkOut)
-    {
-        $checkIn = date('Y-m-d', strtotime($checkIn));
-        $checkOut = date('Y-m-d', strtotime($checkOut));
-
-        $overlappingReservations = Reservation::where(function ($query) use ($checkIn, $checkOut) {
-            $query->where('checkIn', '<', $checkOut)
-                ->where('checkOut', '>', $checkIn);
-        })->whereIn('status', ['Approved', 'In Resort'])->get();
-
-        $reserveCottageIds = [];
-
-        $reservedCottageNames = [];
-
-        foreach ($overlappingReservations as $reservation) {
-            foreach ($reservation->cottages as $cottage) {
-                if (in_array($cottage->id, $cottageIds)) {
-                    $reserveCottageIds[] = $cottage->id;
-                    $reservedCottageNames[] = $cottage->name;
-                }
-            }
-        }
-
-        foreach ($cottageIds as $cottageId) {
-            $cottageFromReservation = Cottage::where('id', $cottageId)->first();
-            if ($cottageFromReservation->active === 0) {
-                $reserveCottageIds[] = $cottageFromReservation->id;
-                $reservedCottageNames[] = $cottageFromReservation->name;
-            }
-        }
-
-        if (!empty($reserveCottageIds)) {
-            if (count($cottageIds) === 1) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "We're sorry, but the cottage you've selected ({$reservedCottageNames[0]}) has just been reserved by someone. Please try picking another available cottage.",
-                    'data' => [
-                        'reservedCottageIds' => $reserveCottageIds,
-                    ]
-                ], 400);
-            } else {
-                $reservedRoomMessage = "One of the cottages you've selected (Cottage Name(s): " . implode(", ", $reservedCottageNames) . ") has just been reserved by someone. Please try picking another available cottage(s).";
-                return response()->json([
-                    'success' => false,
-                    'message' => $reservedRoomMessage,
-                    'data' => [
-                        'reservedCottageIds' => $reserveCottageIds,
-                    ]
-                ], 400);
-            }
-        }
-        return false;
-    }
-
-    private function validateRoomAvailability($roomIds, $checkIn, $checkOut)
-    {
-        // Convert dates to MySQL date format
-        $checkIn = date('Y-m-d', strtotime($checkIn));
-        $checkOut = date('Y-m-d', strtotime($checkOut));
-
-        // Query to check for overlapping reservations
-        $overlappingReservations = Reservation::where(function ($query) use ($checkIn, $checkOut) {
-            $query->where('checkIn', '<', $checkOut)
-                ->where('checkOut', '>', $checkIn);
-        })->whereIn('status', ['Approved', 'In Resort'])->get();
-
-        // Array to store reserved room IDs
-        $reservedRoomIds = [];
-
-        // Array to store reserved room names
-        $reservedRoomNames = [];
-
-        // Iterate over each reservation and check if any of the room IDs match
-        foreach ($overlappingReservations as $reservation) {
-            foreach ($reservation->rooms as $room) {
-                if (in_array($room->id, $roomIds)) {
-                    // Room is not available, add the reserved room ID to the array
-                    $reservedRoomIds[] = $room->id;
-                    // Add the reserved room name to the array
-                    $reservedRoomNames[] = $room->name;
-                }
-            }
-        }
-
-
-        foreach ($roomIds as $roomId) {
-            $roomFromReservation = Room::where('id', $roomId)->first();
-            if ($roomFromReservation->active === 0) {
-                $reservedRoomIds[] = $roomFromReservation->id;
-                $reservedRoomNames[] = $roomFromReservation->name;
-            }
-        }
-
-        // If any room is reserved
-        if (!empty($reservedRoomIds)) {
-            // If only one room is selected
-            if (count($roomIds) === 1) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "We're sorry, but the room you've selected ({$reservedRoomNames[0]}) has just been reserved by someone. Please try picking another available room.",
-                    'data' => [
-                        'reservedRoomIds' => $reservedRoomIds,
-                    ]
-                ], 400);
-            }
-            // If multiple rooms are selected
-            else {
-                $reservedRoomMessage = "One of the rooms you've selected (Room Name(s): " . implode(", ", $reservedRoomNames) . ") has just been reserved by someone. Please try picking another available room(s).";
-                return response()->json([
-                    'success' => false,
-                    'message' => $reservedRoomMessage,
-                    'data' => [
-                        'reservedRoomIds' => $reservedRoomIds,
-                    ]
-                ], 400);
-            }
-        }
-        // All rooms are available
-        return false;
-    }
-
     #resched!
     public function reschedule()
     {
@@ -1247,22 +1038,7 @@ class ReservationController extends Controller
             $reservation->balance = $reservation->total - 500;
             $reservation->save();
 
-            $emailContent = [
-                'customerName' => $reservation->customer->firstName . ' ' . $reservation->customer->lastName,
-                'balance' => number_format($reservation->balance, 2),
-                'email' => $email,
-            ];
-            if (env('APP_PROD')) {
-                Mail::to($email)->send(new RescheduleMail($emailContent));
-            }
-
-            $frontDesksEmail = User::whereHas('roles', function ($query) {
-                $query->where('roleName', 'Front Desk');
-            })->pluck('email');
-
-            if (env('APP_PROD')) {
-                Mail::to($frontDesksEmail)->send(new RescheduleFrontDesksMail($emailContent));
-            }
+            RescheduledReservation::dispatch($reservation); // email both frontdesk and customer.
 
             // Return success response
             return response()->json([
@@ -1278,19 +1054,7 @@ class ReservationController extends Controller
         }
     }
     ### reschedule link generator
-    private function generateTokenLinkForReschedule($reservation, $customerEmail)
-    {
-        $token = Str::random(60);
-        $expiry = Carbon::now()->addHours(3);
-        ReservationPaymentToken::create([
-            'token' => $token,
-            'expiry_time' => $expiry,
-            'reservation_id' => $reservation->id,
-        ]);
-        $frontendURL = env('FRONTEND_URL');
-        $link = URL::to("$frontendURL/reschedule/$token" . "?email=$customerEmail" . "&id=$reservation->reservationHASH" . "&type=$reservation->accommodationType");
-        return $link;
-    }
+
 }
 
 
