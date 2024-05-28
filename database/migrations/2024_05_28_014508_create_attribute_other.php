@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('other_attribute_other_type', function (Blueprint $table) {
             $table->id();
-            $table->enum('name', ['Resort', 'Room', 'Cottage', 'Room Add Ons', 'Cottage Add Ons', 'Other', 'Other Add Ons'])->default('Resort');
+            $table->foreignId('other_attribute_id')->constrained('other_attributes');
+            $table->foreignId('other_type_id')->constrained('other_types');
             $table->timestamps();
         });
     }
@@ -23,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('other_attribute_other_type');
     }
 };

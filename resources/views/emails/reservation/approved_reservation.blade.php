@@ -67,21 +67,33 @@
             <p><strong>Departure Date and Time:</strong> {{ $data['departureDateTime'] }}</p>
 
             @if (isset($data['rooms']) && count($data['rooms']) > 0)
-            <p><strong>Rooms:</strong></p>
-            <ul>
-                @foreach($data['rooms'] as $room)
-                <li><strong>Name:</strong> {{ $room['name'] }}, <strong>Type:</strong> {{ $room['roomType']['type'] }}</li>
-                @endforeach
-            </ul>
+                <p><strong>Rooms:</strong></p>
+                <ul>
+                    @foreach ($data['rooms'] as $room)
+                        <li><strong>Name:</strong> {{ $room['name'] }}, <strong>Type:</strong>
+                            {{ $room['roomType']['type'] }}</li>
+                    @endforeach
+                </ul>
             @endif
 
             @if (isset($data['cottages']) && count($data['cottages']) > 0)
-            <p><strong>Cottages:</strong></p>
-            <ul>
-                @foreach($data['cottages'] as $cottage)
-                <li><strong>Name:</strong> {{ $cottage['name'] }}, <strong>Type:</strong> {{ $cottage['cottageType']['type'] }}</li>
-                @endforeach
-            </ul>
+                <p><strong>Cottages:</strong></p>
+                <ul>
+                    @foreach ($data['cottages'] as $cottage)
+                        <li><strong>Name:</strong> {{ $cottage['name'] }}, <strong>Type:</strong>
+                            {{ $cottage['cottageType']['type'] }}</li>
+                    @endforeach
+                </ul>
+            @endif
+
+            @if (isset($data['others']) && count($data['others']) > 0)
+                <p><strong>Others:</strong></p>
+                <ul>
+                    @foreach ($data['others'] as $other)
+                        <li><strong>Name:</strong> {{ $other['name'] }}, <strong>Type:</strong>
+                            {{ $other['otherType']['type'] }}</li>
+                    @endforeach
+                </ul>
             @endif
 
             <p><strong>Total:</strong> ₱{{ $data['total'] }}</p>
@@ -92,8 +104,10 @@
         <div class="footer">
             <p>Please note that your reservation will be canceled if you do not arrive between 2pm and 8pm.</p>
             {{-- Reschedule Link --}}
-            <p>If you wish to reschedule your reservation, you can do so <a href="{{ $data['rescheduleLink'] }}" class="link">here</a>.</p>
-            <p>If you have any questions or need assistance, feel free to contact us at <a href="mailto:Luckyland.resort58@gmail.com" class="link">Luckyland.resort58@gmail.com</a>.</p>
+            <p>If you wish to reschedule your reservation, you can do so <a href="{{ $data['rescheduleLink'] }}"
+                    class="link">here</a>.</p>
+            <p>If you have any questions or need assistance, feel free to contact us at <a
+                    href="mailto:Luckyland.resort58@gmail.com" class="link">Luckyland.resort58@gmail.com</a>.</p>
             <p>We look forward to welcoming you!</p>
         </div>
     </div>

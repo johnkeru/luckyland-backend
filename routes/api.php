@@ -9,6 +9,7 @@ use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\EmployeeLogsController;
 use App\Http\Controllers\FAQController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\OtherController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\UnavailableController;
@@ -31,6 +32,7 @@ Route::prefix('landing')->group(function () {
     Route::get('accommodations', [RoomController::class, 'landingAccommodations']);
     Route::get('rooms', [RoomController::class, 'getLandingPageRooms']);
     Route::get('cottages', [CottageController::class, 'getLandingPageCottages']);
+    Route::get('others', [OtherController::class, 'getLandingPageOthers']);
     // to test and remove
     Route::get('/', [RoomController::class, 'getAllRoomTypes']);
 });
@@ -39,10 +41,12 @@ Route::prefix('landing')->group(function () {
 Route::prefix('reservations')->group(function () {
     Route::post('unavailable-dates-by-rooms', [ReservationController::class, 'getUnavailableDatesByRooms']);
     Route::post('unavailable-dates-by-cottages', [ReservationController::class, 'getUnavailableDatesByCottages']);
+    Route::post('unavailable-dates-by-others', [ReservationController::class, 'getUnavailableDatesByOthers']);
     Route::post('unavailable-dates-by-rooms-and-cottages', [ReservationController::class, 'getUnavailableDatesByRoomsAndCottages']);
 
     Route::post('available-rooms', [ReservationController::class, 'getAvailableRooms']);
     Route::post('available-cottages', [ReservationController::class, 'getAvailableCottages']);
+    Route::post('available-others', [ReservationController::class, 'getAvailableOthers']);
     Route::post('available-suggestions', [ReservationController::class, 'suggestions']);
 
     Route::post('create-reservation', [ReservationController::class, 'customerCreateReservation']);

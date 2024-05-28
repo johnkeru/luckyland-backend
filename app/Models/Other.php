@@ -5,30 +5,33 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Cottage extends Model
+class Other extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'name',
         'active',
-        'cottage_type_id',
+        'other_type_id',
     ];
 
     public function reservations()
     {
         return $this->belongsToMany(Reservation::class);
     }
+
     public function images()
     {
-        return $this->hasMany(CottageImage::class);
+        return $this->hasMany(OtherImage::class);
     }
+
     function items()
     {
         return $this->belongsToMany(Item::class)->withPivot(['quantity', 'needStock']);
     }
-    function cottageType()
+
+    function otherType()
     {
-        return $this->belongsTo(CottageType::class);
+        return $this->belongsTo(OtherType::class);
     }
 }

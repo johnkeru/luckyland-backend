@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('other_reservation', function (Blueprint $table) {
             $table->id();
-            $table->enum('name', ['Resort', 'Room', 'Cottage', 'Room Add Ons', 'Cottage Add Ons', 'Other', 'Other Add Ons'])->default('Resort');
+            $table->foreignId('other_id')->nullable()->constrained('others')->onDelete('set null');
+            $table->foreignId('reservation_id')->constrained('reservations')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -23,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('other_reservation');
     }
 };

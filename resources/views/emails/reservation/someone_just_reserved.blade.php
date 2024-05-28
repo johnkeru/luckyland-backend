@@ -68,21 +68,33 @@
             <p><strong>Departure Date and Time:</strong> {{ $data['departureDateTime'] }}</p>
 
             @if (isset($data['rooms']) && count($data['rooms']) > 0)
-            <p><strong>Rooms:</strong></p>
-            <ul>
-                @foreach($data['rooms'] as $room)
-                <li><strong>Name:</strong> {{ $room['name'] }}, <strong>Type:</strong> {{ $room['roomType']['type'] }}</li>
-                @endforeach
-            </ul>
+                <p><strong>Rooms:</strong></p>
+                <ul>
+                    @foreach ($data['rooms'] as $room)
+                        <li><strong>Name:</strong> {{ $room['name'] }}, <strong>Type:</strong>
+                            {{ $room['roomType']['type'] }}</li>
+                    @endforeach
+                </ul>
             @endif
 
             @if (isset($data['cottages']) && count($data['cottages']) > 0)
-            <p><strong>Cottages:</strong></p>
-            <ul>
-                @foreach($data['cottages'] as $cottage)
-                <li><strong>Name:</strong> {{ $cottage['name'] }}, <strong>Type:</strong> {{ $cottage['cottageType']['type'] }}</li>
-                @endforeach
-            </ul>
+                <p><strong>Cottages:</strong></p>
+                <ul>
+                    @foreach ($data['cottages'] as $cottage)
+                        <li><strong>Name:</strong> {{ $cottage['name'] }}, <strong>Type:</strong>
+                            {{ $cottage['cottageType']['type'] }}</li>
+                    @endforeach
+                </ul>
+            @endif
+
+            @if (isset($data['others']) && count($data['others']) > 0)
+                <p><strong>Others:</strong></p>
+                <ul>
+                    @foreach ($data['others'] as $other)
+                        <li><strong>Name:</strong> {{ $other['name'] }}, <strong>Type:</strong>
+                            {{ $other['otherType']['type'] }}</li>
+                    @endforeach
+                </ul>
             @endif
 
             <p><strong>Total:</strong> ₱{{ $data['total'] }}</p>
@@ -90,7 +102,8 @@
             <p><strong>Balance:</strong> ₱{{ $data['balance'] }}</p>
             <p><strong>Status:</strong> {{ $data['status'] }}</p>
 
-            <p>If needed, the reservation can be rescheduled <a href="{{ $data['rescheduleLink'] }}" class="link">here</a>.</p>
+            <p>If needed, the reservation can be rescheduled <a href="{{ $data['rescheduleLink'] }}"
+                    class="link">here</a>.</p>
         </div>
         <div class="footer">
             <p>Please take necessary action.</p>

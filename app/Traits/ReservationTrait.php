@@ -1,15 +1,19 @@
 <?php
+
 namespace App\Traits;
 
 use App\Models\Cottage;
+use App\Models\Other;
 use App\Models\Reservation;
 use App\Models\ReservationPaymentToken;
 use App\Models\Room;
+use App\Models\RoomType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 
-trait ReservationTrait{
+trait ReservationTrait
+{
     public function generateTokenLinkForReschedule($reservation, $customerEmail)
     {
         $token = Str::random(60);
@@ -143,5 +147,299 @@ trait ReservationTrait{
         }
         // All rooms are available
         return false;
+    }
+
+    public function validateOtherAvailability($otherId, $checkIn, $checkOut)
+    {
+        $checkIn = date('Y-m-d', strtotime($checkIn));
+        $checkOut = date('Y-m-d', strtotime($checkOut));
+
+        $overlappingReservations = Reservation::where(function ($query) use ($checkIn, $checkOut) {
+            $query->where('checkIn', '<', $checkOut)
+                ->where('checkOut', '>', $checkIn);
+        })->whereIn('status', ['Approved', 'In Resort'])->get();
+
+        $reservedOtherIds = [];
+
+        $reservedOtherNames = [];
+
+        foreach ($overlappingReservations as $reservation) {
+            foreach ($reservation->others as $other) {
+                if (in_array($other->id, $otherId)) {
+                    $reservedOtherIds[] = $other->id;
+                    $reservedOtherNames[] = $other->name;
+                }
+            }
+        }
+
+
+        foreach ($otherId as $otherId) {
+            $otherFromReservation = Other::where('id', $otherId)->first();
+            if ($otherFromReservation->active === 0) {
+                $reservedOtherIds[] = $otherFromReservation->id;
+                $reservedOtherNames[] = $otherFromReservation->name;
+            }
+        }
+
+        if (!empty($reservedOtherIds)) {
+            if (count($otherId) === 1) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "We're sorry, but the other you've selected ({$reservedOtherNames[0]}) has just been reserved by someone. Please try picking another available other.",
+                    'data' => [
+                        'reservedOtherIds' => $reservedOtherIds,
+                    ]
+                ], 400);
+            } else {
+                $reservedOtherMessage = "One of the others you've selected (Other Name(s): " . implode(", ", $reservedOtherNames) . ") has just been reserved by someone. Please try picking another available other(s).";
+                return response()->json([
+                    'success' => false,
+                    'message' => $reservedOtherMessage,
+                    'data' => [
+                        'reservedOtherIds' => $reservedOtherIds,
+                    ]
+                ], 400);
+            }
+        }
+        return false;
+    }
+
+    public function isSetAccommodation($key, $checkIn, $checkOut)
+    {
+        if (isset($validatedData[$key])) {
+            $cottageIds = array_column($validatedData[$key], 'id');
+            if ($key === 'cottages') {
+                $availabilityResult = $this->validateCottageAvailability($cottageIds, $checkIn, $checkOut);
+            } elseif ($key === 'rooms') {
+                $availabilityResult = $this->validateRoomAvailability($cottageIds, $checkIn, $checkOut);
+            } else {
+                $availabilityResult = $this->validateOtherAvailability($cottageIds, $checkIn, $checkOut);
+            }
+            if ($availabilityResult !== false) {
+                return $availabilityResult;
+            }
+        }
+    }
+
+    public function getRoomsByTotalGuests($totalGuests, $checkIn, $checkOut)
+    {
+        $maxCapacity = RoomType::max('maxCapacity');
+        $minCapacity = RoomType::min('minCapacity');
+        if ($totalGuests <= $minCapacity) {
+            // Handle case where total guests are below min capacity
+            $lowestMinCapacity = RoomType::where('minCapacity', '>=', $totalGuests)->min('minCapacity');
+
+            return Room::with(['roomType', 'roomType.attributes', 'images', 'items' => function ($query) {
+                $query->whereHas('categories', function ($query) {
+                    $query->where('name', 'Room');
+                });
+            }])
+                ->whereHas('roomType', function ($query) use ($lowestMinCapacity) {
+                    $query->where('minCapacity', $lowestMinCapacity);
+                })
+                ->where('active', true)
+                ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
+                    $query->whereIn('status', ['Approved', 'In Resort'])
+                        ->where(function ($q) use ($checkIn, $checkOut) {
+                            $q->where('checkIn', '<', $checkOut)
+                                ->where('checkOut', '>', $checkIn);
+                        });
+                })
+                ->get();
+        } else if ($totalGuests > $maxCapacity) {
+            return Room::with(['roomType', 'roomType.attributes', 'images', 'items' => function ($query) {
+                $query->whereHas('categories', function ($query) {
+                    $query->where('name', 'Room');
+                });
+            }])
+                ->where('active', true)
+                ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
+                    $query->whereIn('status', ['Approved', 'In Resort'])
+                        ->where(function ($q) use ($checkIn, $checkOut) {
+                            $q->where('checkIn', '<', $checkOut)
+                                ->where('checkOut', '>', $checkIn);
+                        });
+                })
+                ->get();
+        } else {
+            return Room::with(['roomType', 'roomType.attributes', 'images', 'items' => function ($query) {
+                $query->whereHas('categories', function ($query) {
+                    $query->where('name', 'Room');
+                });
+            }])
+                ->whereHas('roomType',  function ($query) use ($totalGuests) {
+                    $query->where(function ($query) use ($totalGuests) {
+                        $query->where('minCapacity', '<=', $totalGuests)
+                            ->where('maxCapacity', '>=', $totalGuests);
+                    });
+                })
+                ->where('active', true)
+                ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
+                    $query->whereIn('status', ['Approved', 'In Resort'])
+                        ->where(function ($q) use ($checkIn, $checkOut) {
+                            $q->where('checkIn', '<', $checkOut)
+                                ->where('checkOut', '>', $checkIn);
+                        });
+                })
+                ->get();
+        }
+    }
+
+    public function getCottagesByTotalGuests($totalGuests, $checkIn, $checkOut)
+    {
+        if ($totalGuests <= 10) {
+            return Cottage::with(['images', 'cottageType.attributes', 'items' => function ($query) {
+                $query->whereHas('categories', function ($query) {
+                    $query->where('name', 'Cottage');
+                });
+            }])
+                ->where('active', true)
+                ->whereHas('cottageType', function ($query) {
+                    $query->where('capacity', '<=', 10);
+                })
+                ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
+                    $query->whereIn('status', ['Approved', 'In Resort'])
+                        ->where(function ($q) use ($checkIn, $checkOut) {
+                            $q->where('checkIn', '<', $checkOut)
+                                ->where('checkOut', '>', $checkIn);
+                        });
+                })
+                ->get();
+        } else if ($totalGuests > 10 && $totalGuests <= 20) {
+            return Cottage::with(['images', 'cottageType.attributes', 'items' => function ($query) {
+                $query->whereHas('categories', function ($query) {
+                    $query->where('name', 'Cottage');
+                });
+            }])
+                ->where('active', true)
+                ->whereHas('cottageType', function ($query) {
+                    $query->where('capacity', '>=', 10)
+                        ->where('capacity', '<=', 20);
+                })
+                ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
+                    $query->whereIn('status', ['Approved', 'In Resort'])
+                        ->where(function ($q) use ($checkIn, $checkOut) {
+                            $q->where('checkIn', '<', $checkOut)
+                                ->where('checkOut', '>', $checkIn);
+                        });
+                })
+                ->get();
+        } else if ($totalGuests > 20 && $totalGuests <= 30) {
+            return Cottage::with(['images', 'cottageType.attributes', 'items' => function ($query) {
+                $query->whereHas('categories', function ($query) {
+                    $query->where('name', 'Cottage');
+                });
+            }])
+                ->where('active', true)
+                ->whereHas('cottageType', function ($query) {
+                    $query->where('capacity', '>=', 20)
+                        ->where('capacity', '<=', 30);
+                })
+                ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
+                    $query->whereIn('status', ['Approved', 'In Resort'])
+                        ->where(function ($q) use ($checkIn, $checkOut) {
+                            $q->where('checkIn', '<', $checkOut)
+                                ->where('checkOut', '>', $checkIn);
+                        });
+                })
+                ->get();
+        } else if ($totalGuests > 30 && $totalGuests <= 40) {
+            return Cottage::with(['images', 'cottageType.attributes', 'items' => function ($query) {
+                $query->whereHas('categories', function ($query) {
+                    $query->where('name', 'Cottage');
+                });
+            }])
+                ->where('active', true)
+                ->whereHas('cottageType', function ($query) {
+                    $query->where('capacity', '>=', 30)
+                        ->where('capacity', '<=', 40);
+                })
+                ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
+                    $query->whereIn('status', ['Approved', 'In Resort'])
+                        ->where(function ($q) use ($checkIn, $checkOut) {
+                            $q->where('checkIn', '<', $checkOut)
+                                ->where('checkOut', '>', $checkIn);
+                        });
+                })
+                ->get();
+        } else {
+            return Cottage::with(['images', 'cottageType.attributes', 'items' => function ($query) {
+                $query->whereHas('categories', function ($query) {
+                    $query->where('name', 'Cottage');
+                });
+            }])
+                ->where('active', true)
+                ->whereHas('cottageType', function ($query) {
+                    $query->where('capacity', '>=', 40);
+                })
+                ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
+                    $query->whereIn('status', ['Approved', 'In Resort'])
+                        ->where(function ($q) use ($checkIn, $checkOut) {
+                            $q->where('checkIn', '<', $checkOut)
+                                ->where('checkOut', '>', $checkIn);
+                        });
+                })
+                ->get();
+        }
+    }
+
+    public function getOthersByTotalGuests($totalGuests, $checkIn, $checkOut)
+    {
+        if ($totalGuests <= 20) {
+            return Other::with(['images', 'otherType.attributes', 'items' => function ($query) {
+                $query->whereHas('categories', function ($query) {
+                    $query->where('name', 'Other');
+                });
+            }])
+                ->where('active', true)
+                ->whereHas('otherType', function ($query) {
+                    $query->where('capacity', '<=', 20);
+                })
+                ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
+                    $query->whereIn('status', ['Approved', 'In Resort'])
+                        ->where(function ($q) use ($checkIn, $checkOut) {
+                            $q->where('checkIn', '<', $checkOut)
+                                ->where('checkOut', '>', $checkIn);
+                        });
+                })
+                ->get();
+        } else if ($totalGuests > 20 && $totalGuests <= 60) {
+            return Other::with(['images', 'otherType.attributes', 'items' => function ($query) {
+                $query->whereHas('categories', function ($query) {
+                    $query->where('name', 'Other');
+                });
+            }])
+                ->where('active', true)
+                ->whereHas('otherType', function ($query) {
+                    $query->where('capacity', '>=', 20)
+                        ->where('capacity', '<=', 60);
+                })
+                ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
+                    $query->whereIn('status', ['Approved', 'In Resort'])
+                        ->where(function ($q) use ($checkIn, $checkOut) {
+                            $q->where('checkIn', '<', $checkOut)
+                                ->where('checkOut', '>', $checkIn);
+                        });
+                })
+                ->get();
+        } else {
+            return Other::with(['images', 'otherType.attributes', 'items' => function ($query) {
+                $query->whereHas('categories', function ($query) {
+                    $query->where('name', 'Other');
+                });
+            }])
+                ->where('active', true)
+                ->whereHas('otherType', function ($query) {
+                    $query->where('capacity', '>=', 120);
+                })
+                ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
+                    $query->whereIn('status', ['Approved', 'In Resort'])
+                        ->where(function ($q) use ($checkIn, $checkOut) {
+                            $q->where('checkIn', '<', $checkOut)
+                                ->where('checkOut', '>', $checkIn);
+                        });
+                })
+                ->get();
+        }
     }
 }

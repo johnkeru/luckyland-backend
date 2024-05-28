@@ -42,10 +42,15 @@ class AddReservationRequest extends FormRequest
 
             'cottages' => 'nullable|array',
             'cottages.*.id' => 'nullable|integer|exists:cottages,id',
-            'cottages.*.isCottageOvernight' => 'nullable|boolean',
             'cottages.*.addOns' => 'nullable|array',
             'cottages.*.addOns.*.quantity' => 'nullable|integer',
             'cottages.*.addOns.*.item_id' => 'nullable|integer|exists:items,id',
+
+            'others' => 'nullable|array',
+            'others.*.id' => 'nullable|integer|exists:others,id',
+            'others.*.addOns' => 'nullable|array',
+            'others.*.addOns.*.quantity' => 'nullable|integer',
+            'others.*.addOns.*.item_id' => 'nullable|integer|exists:items,id',
 
             'customer' => 'required',
             'isWalkIn' => 'boolean',

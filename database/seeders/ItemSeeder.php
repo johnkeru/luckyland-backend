@@ -117,7 +117,7 @@ class ItemSeeder extends Seeder
 
         $cottageAddOns = [
             [
-                'name' => 'Karaoke',
+                'name' => 'Videoke',
                 'price' => 200,
                 'description' => 'Just sing a long',
                 'status' => 'In Stock',
@@ -134,7 +134,7 @@ class ItemSeeder extends Seeder
         $roomAddOns = [
             [
                 'name' => 'Bed',
-                'price' => 28,
+                'price' => 500,
                 'description' => 'comfortable to pee',
                 'status' => 'In Stock',
                 'maxQuantity' => 200,
@@ -160,7 +160,34 @@ class ItemSeeder extends Seeder
         ];
         foreach ($bothAddOns as $bothAddOn) {
             $item = Item::create($bothAddOn);
-            $item->categories()->attach([4, 5]);
+            $item->categories()->attach([4, 5,]);
+        }
+
+
+        // other
+        $itemsForOther = [
+            [
+                'name' => 'Grill Grate',
+                'price' => 200,
+                'description' => '',
+                'status' => 'In Stock',
+                'maxQuantity' => 200,
+                'currentQuantity' => 200,
+                'reOrderPoint' => 20,
+            ],
+            [
+                'name' => 'Videoke',
+                'price' => 200,
+                'description' => 'Just sing a long',
+                'status' => 'In Stock',
+                'maxQuantity' => 200,
+                'currentQuantity' => 200,
+                'reOrderPoint' => 20,
+            ],
+        ];
+        foreach ($itemsForOther as $itemForOther) {
+            $item = Item::create($itemForOther);
+            $item->categories()->attach(6);
         }
     }
 }

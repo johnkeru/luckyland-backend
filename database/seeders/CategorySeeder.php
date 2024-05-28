@@ -13,11 +13,13 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ["name" => "Resort"],
-            ["name" => "Room"],
-            ["name" => "Cottage"],
-            ["name" => "Room Add Ons"],
-            ["name" => "Cottage Add Ons"],
+            ["name" => "Resort"], // 1
+            ["name" => "Room"], // 2
+            ["name" => "Cottage"], // 3
+            ["name" => "Room Add Ons"], // 4
+            ["name" => "Cottage Add Ons"], // 5
+            ["name" => "Other"], // 6
+            ["name" => "Other Add Ons"], // 7
         ];
         Category::insert($categories);
     }

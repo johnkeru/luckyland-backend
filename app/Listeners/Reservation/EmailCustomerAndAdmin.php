@@ -41,6 +41,7 @@ class EmailCustomerAndAdmin
             'customerName' => $event->reservation->customer->firstName . ' ' . $event->reservation->customer->lastName,
             'rooms' => $event->reservation->rooms,
             'cottages' => $event->reservation->cottages, //(optional),
+            'others' => $event->reservation->others, //(optional),
             'rescheduleLink' => $this->generateTokenLinkForReschedule($event->reservation, $recipient)
         ];
         if (env('APP_PROD')) {
@@ -58,6 +59,7 @@ class EmailCustomerAndAdmin
             'customerName' => $emailContent['customerName'],
             'rooms' => $emailContent['rooms'],
             'cottages' => $emailContent['cottages'], //(optional),
+            'others' => $emailContent['others'],
             'rescheduleLink' => $emailContent['rescheduleLink'],
 
             'total' => $emailContent['total'],

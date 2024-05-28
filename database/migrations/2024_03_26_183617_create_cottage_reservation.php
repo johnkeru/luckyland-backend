@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('cottage_reservation', function (Blueprint $table) {
             $table->id();
-            $table->boolean('isCottageOvernight')->nullable();
             $table->foreignId('cottage_id')->nullable()->constrained('cottages')->onDelete('set null');
             $table->foreignId('reservation_id')->constrained('reservations')->onDelete('cascade');
             $table->timestamps();

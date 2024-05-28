@@ -39,7 +39,7 @@ return new class extends Migration
             $table->integer('totalRoomsPrice')->nullable();
             $table->integer('totalCottagesPrice')->nullable();
             $table->integer('days')->nullable();
-            $table->enum('accommodationType', ['both', 'rooms', 'cottages'])->default('both');
+            $table->enum('accommodationType', ['all', 'rooms', 'cottages', 'others'])->default('all');
 
             $table->foreignId('customer_id')->constrained('customers')->onDelete('cascade');
             // an employee who manage the reservation instead the customer.

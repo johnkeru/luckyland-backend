@@ -8,11 +8,13 @@ class ReservationAvailableCottagesResponse implements Responsable
 {
     protected $cottages;
     protected $addOns;
+    protected $isOther;
 
-    public function __construct($cottages,  $addOns)
+    public function __construct($cottages,  $addOns, $isOther = false)
     {
         $this->cottages = $cottages;
         $this->addOns = $addOns;
+        $this->isOther = $isOther;
     }
 
     public function toResponse($request)
@@ -33,17 +35,22 @@ class ReservationAvailableCottagesResponse implements Responsable
                     'id' => $cottage->id,
                     'name' => $cottage->name,
                     'active' => $cottage->active,
-                    'type' => $cottage->cottageType->type,
-                    'price' => $cottage->cottageType->price,
-                    'description' => $cottage->cottageType->description,
-                    'capacity' => $cottage->cottageType->capacity,
+                    'type' => $this->isOther ? $cottage->otherType->type : $cottage->cottageType->type,
+                    'price' => $this->isOther ? $cottage->otherType->price : $cottage->cottageType->price,
+                    'description' => $this->isOther ? $cottage->otherType->description : $cottage->cottageType->description,
+                    'capacity' => $this->isOther ? $cottage->otherType->capacity : $cottage->cottageType->capacity,
                     'images' => $cottage->images->map(function ($cottage) {
                         return [
                             'id' => $cottage->id,
                             'url' => $cottage->url,
                         ];
                     }),
-                    'attributes' => $cottage->cottageType->attributes->map(function ($attribute) {
+                    'attributes' => $this->isOther ? $cottage->otherType->attributes->map(function ($attribute) {
+                        return [
+                            'id' => $attribute->id,
+                            'name' => $attribute->name,
+                        ];
+                    }) : $cottage->cottageType->attributes->map(function ($attribute) {
                         return [
                             'id' => $attribute->id,
                             'name' => $attribute->name,

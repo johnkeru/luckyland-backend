@@ -47,7 +47,11 @@ class Reservation extends Model
     }
     public function cottages()
     {
-        return $this->belongsToMany(Cottage::class)->withPivot('isCottageOvernight');
+        return $this->belongsToMany(Cottage::class);
+    }
+    public function others()
+    {
+        return $this->belongsToMany(Other::class);
     }
     public function customer()
     {

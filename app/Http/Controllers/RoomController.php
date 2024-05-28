@@ -11,6 +11,7 @@ use App\Http\Responses\RoomTypesResponse;
 use App\Models\CottageType;
 use App\Models\EmployeeLogs;
 use App\Models\Item;
+use App\Models\OtherType;
 use App\Models\Room;
 use App\Models\RoomAttribute;
 use App\Models\RoomImage;
@@ -52,7 +53,12 @@ class RoomController extends Controller
                 $cottageType->setRelation('cottages', $cottageType->cottages->take(1));
             });
 
-            return response()->json(['data' => ['rooms' => $roomTypes, 'cottages' => $cottageTypes]]);
+            $otherTypes = OtherType::has('others')->with(['others.images', 'attributes'])->get();
+            $otherTypes->each(function ($cottageType) {
+                $cottageType->setRelation('others', $cottageType->others->take(1));
+            });
+
+            return response()->json(['data' => ['rooms' => $roomTypes, 'cottages' => $cottageTypes, 'others' => $otherTypes]]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }

@@ -46,10 +46,8 @@ class DatabaseSeeder extends Seeder
         $this->call(DeliverySeeder::class);
 
         $this->call(RoomTypeSeeder::class);
-        $this->call(RoomSeeder::class);
-
         $this->call(CottageTypeSeeder::class);
-        $this->call(CottageSeeder::class);
+        $this->call(OtherTypeSeeder::class);
 
         $this->call(EmployeeSeeder::class);
 

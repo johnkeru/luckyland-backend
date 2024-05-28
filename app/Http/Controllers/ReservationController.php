@@ -17,9 +17,11 @@ use App\Models\Cottage;
 use App\Models\Customer;
 use App\Models\EmployeeLogs;
 use App\Models\Item;
+use App\Models\Other;
 use App\Models\Reservation;
 use App\Models\ReservationPaymentToken;
 use App\Models\Room;
+use App\Models\RoomType;
 use App\Models\Unavailable;
 use App\Models\User;
 use App\Models\Waste;
@@ -226,6 +228,87 @@ class ReservationController extends Controller
         }
     }
 
+    public function getUnavailableDatesByOthers($simpleResponse = false)
+    {
+        try {
+            // Initialize an empty array to store unavailable dates
+            $unavailableDates = [];
+            $previousDates = [];
+
+            $reservationHASH = request()->reservationHASH ?? null;
+            $othersQuery = Other::with(['reservations' => function ($query) {
+                $query->whereIn('status', ['Approved', 'In Resort']);
+            }])->where('active', true);
+
+            if ($reservationHASH !== null) {
+                $existingReservationForResched = Reservation::where('reservationHASH', $reservationHASH)->first();
+                $previousDates['checkIn'] = $existingReservationForResched->checkIn;
+                $previousDates['checkOut'] = $existingReservationForResched->checkOut;
+                $previousDates['duration'] = $existingReservationForResched->days;
+
+                $othersQuery->whereDoesntHave('reservations', function ($query) use ($reservationHASH) {
+                    $query->where('reservationHASH', $reservationHASH);
+                });
+            }
+            $others = $othersQuery->get();
+
+
+            // Create an array to store reservations for each date
+            $reservationsByDate = [];
+
+            // Iterate over each other
+            foreach ($others as $other) {
+                // Iterate over reservations of the current other
+                foreach ($other->reservations as $reservation) {
+                    // Generate range of dates between check-in and check-out
+                    $datesRange = \Carbon\CarbonPeriod::create($reservation->checkIn, $reservation->checkOut);
+
+                    // Add each date in the range to the reservations by date array
+                    foreach ($datesRange as $date) {
+                        $dateString = $date->format('Y-m-d');
+                        if (!isset($reservationsByDate[$dateString])) {
+                            $reservationsByDate[$dateString] = [];
+                        }
+                        $reservationsByDate[$dateString][$other->id] = true;
+                    }
+                }
+            }
+
+            // Iterate over reservations by date
+            foreach ($reservationsByDate as $date => $reservedOthers) {
+                // If count of reserved others equals total others, add date to unavailable dates
+                if (count($reservedOthers) == count($others)) {
+                    $unavailableDates[] = $date;
+                }
+            }
+
+            // Return the array of unavailable dates
+            if (!$simpleResponse) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'unavailableDates' => $unavailableDates,
+                        'previousDates' => $previousDates
+                    ]
+                ], 200);
+            } else {
+                return [
+                    'success' => true,
+                    'data' => [
+                        'unavailableDates' => $unavailableDates,
+                        'previousDates' => $previousDates
+                    ]
+                ];
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'message' => 'Failed to get unavailable dates'
+            ], 500);
+        }
+    }
+
     public function getUnavailableDatesByRoomsAndCottages()
     {
         try {
@@ -240,10 +323,11 @@ class ReservationController extends Controller
             // Call the existing functions to get unavailable dates for rooms and cottages
             $unavailableDatesRooms = $this->getUnavailableDatesByRooms(true)['data']['unavailableDates'];
             $unavailableDatesCottages = $this->getUnavailableDatesByCottages(true)['data']['unavailableDates'];
+            $unavailableDatesOthers = $this->getUnavailableDatesByOthers(true)['data']['unavailableDates'];
             // error here,,,,,,,,
 
             // Find the intersection of unavailable dates from both sources
-            $unavailableDates = array_intersect($unavailableDatesRooms, $unavailableDatesCottages);
+            $unavailableDates = array_intersect($unavailableDatesRooms, $unavailableDatesCottages, $unavailableDatesOthers);
 
             // Return the array of unavailable dates
             return response()->json([
@@ -340,6 +424,44 @@ class ReservationController extends Controller
         }
     }
 
+    public function getAvailableOthers()
+    {
+        try {
+            $checkIn = request()->checkIn;
+            $checkOut = request()->checkOut;
+
+            // Calculate available rooms
+            $availableCottages = Other::with(['images', 'otherType.attributes', 'items' => function ($query) {
+                $query->whereHas('categories', function ($query) {
+                    $query->where('name', 'Other');
+                });
+            }])
+                ->where('active', true)
+                ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
+                    $query->whereIn('status', ['Approved', 'In Resort'])
+                        ->where(function ($q) use ($checkIn, $checkOut) {
+                            $q->where('checkIn', '<', $checkOut)
+                                ->where('checkOut', '>', $checkIn);
+                        });
+                })
+                ->get();
+
+            // Retrieve additional data
+            $addOns = Item::whereHas('categories', function ($query) {
+                $query->where('name', 'Other Add Ons');
+            })->get();
+
+            return new ReservationAvailableCottagesResponse($availableCottages, $addOns, true);
+        } catch (\Exception $e) {
+            // Return error response if an exception occurs
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'message' => 'Failed to get available others'
+            ], 500);
+        }
+    }
+
     public function suggestions()
     {
         try {
@@ -347,127 +469,14 @@ class ReservationController extends Controller
             $checkOut = request()->checkOut;
             $totalGuests = request()->totalGuests;
 
-            // Get available rooms
-            $availableRooms = null;
-            if ($totalGuests <= 5) {
-                $availableRooms = Room::with(['images', 'roomType.attributes', 'items' => function ($query) {
-                    $query->whereHas('categories', function ($query) {
-                        $query->where('name', 'Room');
-                    });
-                }])
-                    ->where('active', true)
-                    ->whereHas('roomType', function ($query) {
-                        $query->where('type', 'Friends/Couples');
-                    })
-                    ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
-                        $query->whereIn('status', ['Approved', 'In Resort'])
-                            ->where(function ($q) use ($checkIn, $checkOut) {
-                                $q->where('checkIn', '<', $checkOut)
-                                    ->where('checkOut', '>', $checkIn);
-                            });
-                    })
-                    ->get();
-            } else if ($totalGuests >= 6 && $totalGuests <= 10) {
-                $availableRooms = Room::with(['images', 'roomType.attributes', 'items' => function ($query) {
-                    $query->whereHas('categories', function ($query) {
-                        $query->where('name', 'Room');
-                    });
-                }])
-                    ->where('active', true)
-                    ->whereHas('roomType', function ($query) {
-                        $query->where('type', 'Family');
-                    })
-                    ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
-                        $query->whereIn('status', ['Approved', 'In Resort'])
-                            ->where(function ($q) use ($checkIn, $checkOut) {
-                                $q->where('checkIn', '<', $checkOut)
-                                    ->where('checkOut', '>', $checkIn);
-                            });
-                    })
-                    ->get();
-            } else if ($totalGuests > 10) {
-                $availableRooms = Room::with(['images', 'roomType.attributes', 'items' => function ($query) {
-                    $query->whereHas('categories', function ($query) {
-                        $query->where('name', 'Room');
-                    });
-                }])
-                    ->where('active', true)
-                    ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
-                        $query->whereIn('status', ['Approved', 'In Resort'])
-                            ->where(function ($q) use ($checkIn, $checkOut) {
-                                $q->where('checkIn', '<', $checkOut)
-                                    ->where('checkOut', '>', $checkIn);
-                            });
-                    })
-                    ->get();
-            }
+            $availableRooms = $this->getRoomsByTotalGuests($totalGuests, $checkIn, $checkOut);
+            $availableCottages = $this->getCottagesByTotalGuests($totalGuests, $checkIn, $checkOut);
+            $availableOthers = $this->getOthersByTotalGuests($totalGuests, $checkIn, $checkOut);
 
-            // Get available cottages
-            $availableCottages = null;
-            if ($totalGuests <= 10) {
-                $availableCottages = Cottage::with(['images', 'cottageType.attributes', 'items' => function ($query) {
-                    $query->whereHas('categories', function ($query) {
-                        $query->where('name', 'Cottage');
-                    });
-                }])
-                    ->where('active', true)
-                    ->whereHas('cottageType', function ($query) {
-                        $query->where('type', 'Small Cottages');
-                    })
-                    ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
-                        $query->whereIn('status', ['Approved', 'In Resort'])
-                            ->where(function ($q) use ($checkIn, $checkOut) {
-                                $q->where('checkIn', '<', $checkOut)
-                                    ->where('checkOut', '>', $checkIn);
-                            });
-                    })
-                    ->get();
-            } else if ($totalGuests >= 11 && $totalGuests <= 20) {
-                $availableCottages = Cottage::with(['images', 'cottageType.attributes', 'items' => function ($query) {
-                    $query->whereHas('categories', function ($query) {
-                        $query->where('name', 'Cottage');
-                    });
-                }])
-                    ->where('active', true)
-                    ->whereHas('cottageType', function ($query) {
-                        $query->where('type', 'Big Cottages');
-                    })
-                    ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
-                        $query->whereIn('status', ['Approved', 'In Resort'])
-                            ->where(function ($q) use ($checkIn, $checkOut) {
-                                $q->where('checkIn', '<', $checkOut)
-                                    ->where('checkOut', '>', $checkIn);
-                            });
-                    })
-                    ->get();
-            } else if ($totalGuests >= 20) {
-                $availableCottages = Cottage::with(['images', 'cottageType.attributes', 'items' => function ($query) {
-                    $query->whereHas('categories', function ($query) {
-                        $query->where('name', 'Cottage');
-                    });
-                }])
-                    ->where('active', true)
-                    ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
-                        $query->whereIn('status', ['Approved', 'In Resort'])
-                            ->where(function ($q) use ($checkIn, $checkOut) {
-                                $q->where('checkIn', '<', $checkOut)
-                                    ->where('checkOut', '>', $checkIn);
-                            });
-                    })
-                    ->get();
-            }
+            $roomAddOns = Item::whereHas('categories', fn ($query) => $query->where('name', 'Room Add Ons'))->get();
+            $cottageAddOns = Item::whereHas('categories', fn ($query) => $query->where('name', 'Cottage Add Ons'))->get();
 
-            $roomAddOns = Item::whereHas('categories', function ($query) {
-                $query->where('name', 'Room Add Ons');
-            })->get();
-
-            // Retrieve additional data
-            $cottageAddOns = Item::whereHas('categories', function ($query) {
-                $query->where('name', 'Cottage Add Ons');
-            })->get();
-
-
-            return new ReservationSuggestionsResponse($availableRooms, $availableCottages, $roomAddOns, $cottageAddOns);
+            return new ReservationSuggestionsResponse($availableRooms, $availableCottages, $availableOthers, $roomAddOns, $cottageAddOns);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -494,22 +503,12 @@ class ReservationController extends Controller
             // ITEMS FOR ROOMS INCASE THERE'S NO STOCK ANYMORE FOR CERTAIN AMENETIES
             $roomsNeedStock = [];
             $cottagesNeedStock = [];
+            $othersNeedStock = [];
 
-            if (isset($validatedData['cottages'])) {
-                $cottageIds = array_column($validatedData['cottages'], 'id');
-                $availabilityResult = $this->validateCottageAvailability($cottageIds, $checkIn, $checkOut);
-                if ($availabilityResult !== false) {
-                    return $availabilityResult;
-                }
-            }
 
-            if (isset($validatedData['rooms'])) {
-                $roomIds = array_column($validatedData['rooms'], 'id');
-                $availabilityResult = $this->validateRoomAvailability($roomIds, $checkIn, $checkOut);
-                if ($availabilityResult !== false) {
-                    return $availabilityResult;
-                }
-            }
+            $this->isSetAccommodation('cottages', $checkIn, $checkOut);
+            $this->isSetAccommodation('rooms', $checkIn, $checkOut);
+            $this->isSetAccommodation('others', $checkIn, $checkOut);
 
             // reserved room/s (optionally with addOns)
             if (isset($validatedData['rooms'])) {
@@ -627,8 +626,61 @@ class ReservationController extends Controller
                 }
             }
 
+            if (isset($validatedData['others'])) {
+                foreach ($validatedData['others'] as $otherIdWithAddOns) {
+                    $otherId = $otherIdWithAddOns['id'];
+                    $other = Other::findOrFail($otherId);
+
+                    if (isset($otherIdWithAddOns['addOns'])) {
+                        foreach ($otherIdWithAddOns['addOns'] as $addOn) {
+                            $item_id = $addOn['item_id'];
+                            $quantity = $addOn['quantity'];
+                            $item = Item::where('id', $item_id)->first();
+                            if ($item->status === 'Out of Stock' || $item->currentQuantity === 0) {
+                                // this is only for add ons
+                                return response()->json([
+                                    'success' => false,
+                                    'message' => 'We apologize, but the previous reservation has taken the last ' . $item->name . '. Would you like to continue without it?',
+                                    'data' => ['reservedAddOnId' => ['id' => $other->id, 'item_id' => $item->id, 'price' => $item->price, 'name' => $item->name]]
+                                ], 400);
+                            }
+                            $item->currentQuantity -= $quantity;
+                            if ($item->currentQuantity !== 0 && $item->currentQuantity < $item->reOrderPoint) {
+                                $item->status = 'Low Stock';
+                            } else if ($item->currentQuantity === 0) {
+                                $item->status = 'Out of Stock';
+                            }
+                            $other->items()->attach([$item_id => ['quantity' => $quantity]]);
+                            $item->save();
+                        }
+                    }
+
+
+                    foreach ($other->items as $item) {
+                        $pivot = $item->pivot;
+                        if ($item->currentQuantity >= $pivot->quantity) {
+                            $item->currentQuantity -= $pivot->quantity;
+                        } else {
+                            // left the currentQuantity as it is.
+                            $other->items()->updateExistingPivot($item->id, ['needStock' => $pivot->quantity]);
+                            $othersNeedStock[] = [
+                                'other_name' => $other->name,
+                                'item_name' => $item->name,
+                                'quantity_need' => $pivot->quantity
+                            ];
+                        }
+                        if ($item->currentQuantity !== 0 && $item->currentQuantity < $item->reOrderPoint) {
+                            $item->status = 'Low Stock';
+                        } else if ($item->currentQuantity === 0) {
+                            $item->status = 'Out of Stock';
+                        }
+                        $item->save();
+                    }
+                }
+            }
+
             // ONLY GETS TRIGGER IF ROOM, COTTAGE AMENETIES NEED STOCK.
-            if (!empty($roomsNeedStock) || !empty($cottagesNeedStock)) {
+            if (!empty($roomsNeedStock) || !empty($cottagesNeedStock) || !empty($othersNeedStock)) {
                 $roles = ['Admin', 'Inventory', 'Front Desk'];
                 $recipients = User::whereHas('roles', function ($query) use ($roles) {
                     $query->whereIn('roleName', $roles);
@@ -637,6 +689,7 @@ class ReservationController extends Controller
                 $emailContent = [
                     'roomsNeedStock' => $roomsNeedStock,
                     'cottagesNeedStock' => $cottagesNeedStock,
+                    'othersNeedStock' => $othersNeedStock,
                 ];
                 Mail::to($recipients)->send(new ReservationStockNeedMail($emailContent));
             }
@@ -687,6 +740,29 @@ class ReservationController extends Controller
                 foreach ($cottageIds as $cottageId) {
                     $cottage = Cottage::where('id', $cottageId)->first();
                     $items = $cottage->items;
+                    foreach ($items as $item) {
+                        $pivot = $item->pivot;
+                        $quantity = $pivot->quantity;
+                        if ($pivot->needStock === 0) {
+                            Unavailable::create([
+                                'reservation_id' => $reservation->id,
+                                'item_id' => $item->id,
+                                'reason' => 'Reserved for guest' . ' ' . $customer->firstName . ' ' . $customer->lastName,
+                                'quantity' => $quantity,
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            if (isset($validatedData['others'])) {
+                $otherIds = array_column($validatedData['others'], 'id'); // Extract room IDs from validated data
+                $reservation->others()->attach($otherIds);
+
+                $otherIds = collect($validatedData['others'])->pluck('id')->toArray();
+                foreach ($otherIds as $otherId) {
+                    $other = Other::where('id', $otherId)->first();
+                    $items = $other->items;
                     foreach ($items as $item) {
                         $pivot = $item->pivot;
                         $quantity = $pivot->quantity;
