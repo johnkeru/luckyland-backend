@@ -11,7 +11,7 @@ use Illuminate\Database\Seeder;
 
 class EFFamilyRoom extends Seeder
 {
-    private $type = 'EF Family Room';
+    private $type = 'EF Family Rooms';
 
     public function run(): void
     {
@@ -70,7 +70,7 @@ class EFFamilyRoom extends Seeder
     {
         $roomData = [
             [
-                'name' => 'Room 5',
+                'name' => 'EF Family Room 5',
                 'room_type_id' => $roomTypeId,
                 'images' => fn (int $roomId) => [
                     [
@@ -84,7 +84,7 @@ class EFFamilyRoom extends Seeder
                 ]
             ],
             [
-                'name' => 'Room 6',
+                'name' => 'EF Family Room 6',
                 'room_type_id' => $roomTypeId,
                 'images' => fn (int $roomId) => [
                     [
@@ -98,7 +98,7 @@ class EFFamilyRoom extends Seeder
                 ]
             ],
             [
-                'name' => 'Room 7',
+                'name' => 'EF Family Room 7',
                 'room_type_id' => $roomTypeId,
                 'images' => fn (int $roomId) => [
                     [
@@ -112,7 +112,7 @@ class EFFamilyRoom extends Seeder
                 ]
             ],
             [
-                'name' => 'Room 8',
+                'name' => 'EF Family Room 8',
                 'room_type_id' => $roomTypeId,
                 'images' => fn (int $roomId) => [
                     [

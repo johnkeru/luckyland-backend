@@ -10,7 +10,7 @@ use Illuminate\Database\Seeder;
 
 class TreeHouseSeeder extends Seeder
 {
-    private $type = 'Tree House';
+    private $type = 'Tree Houses';
 
     public function run(): void
     {
@@ -48,7 +48,21 @@ class TreeHouseSeeder extends Seeder
     {
         $otherData = [
             [
-                'name' => 'Tree House',
+                'name' => 'Tree House 1',
+                'other_type_id' => $otherTypeId,
+                'images' => fn (int $otherId) => [
+                    [
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
+                        'other_id' => $otherId
+                    ],
+                    [
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'other_id' => $otherId
+                    ],
+                ]
+            ],
+            [
+                'name' => 'Tree House 2',
                 'other_type_id' => $otherTypeId,
                 'images' => fn (int $otherId) => [
                     [

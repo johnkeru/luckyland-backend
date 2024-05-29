@@ -10,7 +10,7 @@ use Illuminate\Database\Seeder;
 
 class DuplexCottageSeeder extends Seeder
 {
-    private $type = 'Duplex Cottage';
+    private $type = 'Duplex Cottages';
 
     public function run(): void
     {

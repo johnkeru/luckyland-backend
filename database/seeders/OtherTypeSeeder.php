@@ -16,6 +16,6 @@ class OtherTypeSeeder extends Seeder
     {
         $this->call(TreeHouseSeeder::class);
         $this->call(OpenHall1Seeder::class);
-        $this->call(ClosedHall2Seeder::class);
+        // $this->call(ClosedHall2Seeder::class);
     }
 }

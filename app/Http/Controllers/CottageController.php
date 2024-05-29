@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AddCottageRequest;
-use App\Http\Requests\EditCottagesByType;
 use App\Http\Requests\EditRoomsByType;
 use App\Http\Responses\AllCottageResponse;
 use App\Http\Responses\CottageTypesResponse;

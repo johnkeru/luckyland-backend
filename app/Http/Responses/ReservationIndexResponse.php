@@ -99,6 +99,14 @@ class ReservationIndexResponse implements Responsable
                     ];
                 }),
                 'cottageCounts' => $reservation->cottages->count(),
+                'others' => $reservation->others->map(function ($other) {
+                    return [
+                        'id' => $other->id,
+                        'name' => $other->name,
+                        'type' => $other->type,
+                    ];
+                }),
+                'otherCounts' => $reservation->others->count(),
                 'status' => $reservation->status,
                 'total' => $reservation->total,
                 'paid' => $reservation->paid,

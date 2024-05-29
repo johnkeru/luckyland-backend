@@ -47,14 +47,16 @@ class ReservationController extends Controller
     public function getOptionsForRoomsAndCottages()
     {
         try {
-            $rooms = Room::latest()->get();
-            $cottages = Cottage::latest()->get();
+            $rooms = Room::latest()->pluck('name');
+            $cottages = Cottage::latest()->pluck('name');
+            $others = Other::latest()->pluck('name');
 
             return response()->json([
                 'success' => true,
                 'data' => [
                     'rooms' => $rooms,
-                    'cottages' => $cottages
+                    'cottages' => $cottages,
+                    'others' => $others
                 ]
             ], 200);
         } catch (\Exception $e) {
@@ -792,11 +794,8 @@ class ReservationController extends Controller
             $paid = request()->paid ?? 0;
 
             if ($id) {
-                if ($paid) {
-                    $reservation->update(['paid' => $paid, 'balance' => 0]);
-                } else {
-                    $reservation->update(['gCashRefNumber' => $gcashPayment, 'paid' => $paid, 'balance' => 0]);
-                }
+                if ($paid) $reservation->update(['paid' => $paid, 'balance' => 0]);
+                else  $reservation->update(['gCashRefNumber' => $gcashPayment, 'paid' => $paid, 'balance' => 0]);
             }
 
             CustomerJustReserved::dispatch($reservation); // trigger event when someone reserved.
@@ -876,6 +875,28 @@ class ReservationController extends Controller
                         $cottage->items()->updateExistingPivot($item->id, ['needStock' => 0]);
                     } else {
                         $cottage->items()->detach($item->id);
+                    }
+                    $item->save();
+                }
+            }
+            $others = $reservation->others;
+            foreach ($others as $other) {
+                $items = $other->items;
+                foreach ($items as $item) {
+                    $isItemForOther = array_reduce($item->categories->toArray(), function ($carry, $category) {
+                        return $carry && ($category['name'] === 'Other' || $category['name'] === 'Resort');
+                    }, true);
+
+                    $pivot = $item->pivot;
+                    $item->currentQuantity += $pivot->needStock !== 0 ? 0 : $pivot->quantity;
+                    if ($item->currentQuantity > $item->reOrderPoint) {
+                        $item->status = 'In Stock';
+                    }
+                    if ($isItemForOther) {
+                        Unavailable::where('reservation_id', $reservation->id)->delete();
+                        $other->items()->updateExistingPivot($item->id, ['needStock' => 0]);
+                    } else {
+                        $other->items()->detach($item->id);
                     }
                     $item->save();
                 }
@@ -984,6 +1005,35 @@ class ReservationController extends Controller
                         }
                     }
                 }
+
+                $others = $reservation->others;
+                foreach ($others as $other) {
+                    $items = $other->items;
+                    foreach ($items as $item) {
+                        $pivot = $item->pivot;
+
+                        $isItemOnlyForOther = array_reduce($item->categories->toArray(), function ($carry, $category) {
+                            return $carry && ($category['name'] === 'Other' && $category['name'] !== 'Resort');
+                        }, true);
+
+                        if ($isItemOnlyForOther) {
+                            Unavailable::where('item_id', $item->id)->delete();
+                            if ($pivot->needStock === 0) {
+                                Waste::create([
+                                    'quantity' => $pivot->quantity,
+                                    'reservation_id' => $reservation->id,
+                                    'item_id' => $item->id
+                                ]);
+                            }
+                        } else {
+                            if ($pivot->needStock === 0) {
+                                Unavailable::where('item_id', $item->id)->update([
+                                    'reason' => "In use by guest " . $reservation->customer->firstName . ' ' . $reservation->customer->lastName
+                                ]);
+                            }
+                        }
+                    }
+                }
             }
 
             if ($requestStatus === 'Departed') {
@@ -1034,6 +1084,25 @@ class ReservationController extends Controller
                                 }
                                 $item->save();
                                 $cottage->items()->detach($item->id);
+                            }
+                        }
+                    }
+                }
+
+                $others = $reservation->others;
+                foreach ($others as $other) {
+                    $items = $other->items;
+                    foreach ($items as $item) {
+                        foreach ($item->categories as $category) {
+                            $pivot = $item->pivot;
+                            if ($category->name === 'Others Add Ons') {
+                                Unavailable::where('item_id', $item->id)->delete();  // --------------- NOW REMOVE IT IN UNAVAILABLE.
+                                $item->currentQuantity += $pivot->minQuantity;
+                                if ($item->currentQuantity > $item->reOrderPoint) {
+                                    $item->status = 'In Stock';
+                                }
+                                $item->save();
+                                $other->items()->detach($item->id);
                             }
                         }
                     }

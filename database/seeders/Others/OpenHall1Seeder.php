@@ -10,7 +10,7 @@ use Illuminate\Database\Seeder;
 
 class OpenHall1Seeder extends Seeder
 {
-    private $type = 'Open Hall 1';
+    private $type = 'Open Halls 1';
 
     public function run(): void
     {

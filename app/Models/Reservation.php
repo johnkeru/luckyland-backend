@@ -70,6 +70,10 @@ class Reservation extends Model
                 })
                     ->orWhereHas('rooms', function ($categoryQuery) use ($search) {
                         $categoryQuery->where('name', 'like', '%' . $search . '%');
+                    })->orWhereHas('cottages', function ($categoryQuery) use ($search) {
+                        $categoryQuery->where('name', 'like', '%' . $search . '%');
+                    })->orWhereHas('others', function ($categoryQuery) use ($search) {
+                        $categoryQuery->where('name', 'like', '%' . $search . '%');
                     });
             })
                 ->orWhere('reservationHASH', 'like', '%' . $search . '%')
@@ -130,6 +134,17 @@ class Reservation extends Model
             if ($cottage) $query->where(function ($query) use ($cottage) {
                 $query->whereHas('cottages', function ($cottageQuery) use ($cottage) {
                     $cottageQuery->where('name', '=', $cottage);
+                });
+            });
+        }
+    }
+
+    public function scopeFilterByOther($query, $other)
+    {
+        if ($other) {
+            if ($other) $query->where(function ($query) use ($other) {
+                $query->whereHas('others', function ($otherQuery) use ($other) {
+                    $otherQuery->where('name', '=', $other);
                 });
             });
         }

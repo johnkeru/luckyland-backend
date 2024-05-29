@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AddRoomRequest;
-use App\Http\Requests\AddRoomsByType;
 use App\Http\Requests\EditRoomsByType;
 use App\Http\Responses\AllRoomResponse;
 use App\Http\Responses\ReservationAvailableRoomsResponse;

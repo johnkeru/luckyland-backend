@@ -91,6 +91,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('rooms/types', [RoomController::class, 'getAllRoomTypes']);
         Route::get('cottages', [CottageController::class, 'getAllCottages']);
         Route::get('cottages/types', [CottageController::class, 'getAllCottageTypes']);
+        Route::get('others', [OtherController::class, 'getAllOthers']);
+        Route::get('others/types', [OtherController::class, 'getAllOtherTypes']);
 
 
         Route::get('dashboard/bar-graph', [DashboardController::class, 'barMonthlyReservation']);
@@ -152,6 +154,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::put('update-cottage/{cottage}', [CottageController::class, 'updateCottage']);
             // Route::post('add-cottage-type', [CottageController::class, 'addCottagesByType']);
             Route::put('update-cottages-by-type', [CottageController::class, 'updateCottagesByType']);
+        });
+        Route::prefix('others')->group(function () {
+            Route::post('add-other', [OtherController::class, 'addOther']);
+            Route::put('update-other/{other}', [OtherController::class, 'updateOther']);
+            Route::put('update-other-by-type', [OtherController::class, 'updateOthersByType']);
         });
     });
 

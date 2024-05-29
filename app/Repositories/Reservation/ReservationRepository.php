@@ -16,6 +16,8 @@ class ReservationRepository implements ReservationInterface
 
             $room = request()->query('room');
             $cottage = request()->query('cottage');
+            $other = request()->query('other');
+
             $status = request()->query('status');
             $month = request()->query('month');
 
@@ -23,9 +25,10 @@ class ReservationRepository implements ReservationInterface
                 ->latest()
                 ->filterByRoom($room)
                 ->filterByCottage($cottage)
+                ->filterByOther($other)
                 ->filterByStatus($status)
                 ->filterByMonth($month)
-                ->with(['rooms', 'cottages', 'customer', 'customer.address'])
+                ->with(['rooms', 'cottages', 'others', 'customer', 'customer.address'])
                 ->paginate(8);
 
             $counts = [

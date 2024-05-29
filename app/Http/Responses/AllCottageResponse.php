@@ -7,10 +7,12 @@ use Illuminate\Contracts\Support\Responsable;
 class AllCottageResponse implements Responsable
 {
     protected $cottages;
+    protected $isOther;
 
-    public function __construct($cottages)
+    public function __construct($cottages, $isOther = false)
     {
         $this->cottages = $cottages;
+        $this->isOther = $isOther;
     }
 
     public function toResponse($request)
@@ -30,10 +32,10 @@ class AllCottageResponse implements Responsable
                 'id' => $cottage->id,
                 'name' => $cottage->name,
                 'active' => $cottage->active,
-                'type' => $cottage->cottageType->type,
-                'price' => $cottage->cottageType->price,
-                'description' => $cottage->cottageType->description,
-                'capacity' => $cottage->cottageType->capacity,
+                'type' => $this->isOther ?  $cottage->otherType->type : $cottage->cottageType->type,
+                'price' => $this->isOther ?  $cottage->otherType->price : $cottage->cottageType->price,
+                'description' => $this->isOther ?  $cottage->otherType->description : $cottage->cottageType->description,
+                'capacity' => $this->isOther ?  $cottage->otherType->capacity : $cottage->cottageType->capacity,
 
                 'images' => $cottage->images->map(function ($cottage) {
                     return [
@@ -42,7 +44,7 @@ class AllCottageResponse implements Responsable
                     ];
                 }),
 
-                'attributes' => $cottage->cottageType->attributes->map(function ($attribute) {
+                'attributes' => $this->isOther ?  $cottage->otherType->attributes : $cottage->cottageType->attributes->map(function ($attribute) {
                     return [
                         'id' => $attribute->id,
                         'name' => $attribute->name,
