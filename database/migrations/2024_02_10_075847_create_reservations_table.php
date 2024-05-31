@@ -38,6 +38,7 @@ return new class extends Migration
             // added for reschedule to track the new prices depends on day/s            
             $table->integer('totalRoomsPrice')->nullable();
             $table->integer('totalCottagesPrice')->nullable();
+            $table->integer('totalOthersPrice')->nullable();
             $table->integer('days')->nullable();
             $table->enum('accommodationType', ['all', 'rooms', 'cottages', 'others'])->default('all');
 

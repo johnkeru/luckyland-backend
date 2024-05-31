@@ -30,6 +30,7 @@ class AddReservationRequest extends FormRequest
 
             'totalRoomsPrice' => 'required|integer',
             'totalCottagesPrice' => 'required|integer',
+            'totalOthersPrice' => 'required|integer',
             'days' => 'required|integer',
             'accommodationType' => 'required|string',
 

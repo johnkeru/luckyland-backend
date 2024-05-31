@@ -125,8 +125,8 @@ class ItemSeeder extends Seeder
                 'reOrderPoint' => 20,
             ],
             [
-                'name' => 'Grill Grate',
-                'price' => 200,
+                'name' => 'Grill Stand',
+                'price' => 30,
                 'description' => '',
                 'status' => 'In Stock',
                 'maxQuantity' => 200,
@@ -142,8 +142,8 @@ class ItemSeeder extends Seeder
 
         $otherAndCottageAddOns = [
             [
-                'name' => 'Grill Grate',
-                'price' => 200,
+                'name' => 'Grill Stand',
+                'price' => 30,
                 'description' => '',
                 'status' => 'In Stock',
                 'maxQuantity' => 200,
