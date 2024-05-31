@@ -19,7 +19,7 @@ class EFCoupleRoomSeeder extends Seeder
         $roomType = RoomType::create([
             'description' => 'Experience the perfect blend of intimacy and camaraderie in our Friends/Couple Room. This room offers a cozy retreat where you can relax and reconnect. Enjoy the comfort of shared moments and the privacy you need for a memorable stay with your favorite companion.',
             'type' => $this->type,
-            'price' => 2500,
+            'price' => 2000,
             'minCapacity' => 2,
             'maxCapacity' => 4,
         ]);

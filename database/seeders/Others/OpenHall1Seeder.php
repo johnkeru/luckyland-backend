@@ -2,6 +2,7 @@
 
 namespace Database\Seeders\Others;
 
+use App\Models\Item;
 use App\Models\Other;
 use App\Models\OtherAttribute;
 use App\Models\OtherImage;
@@ -91,5 +92,18 @@ class OpenHall1Seeder extends Seeder
                 OtherImage::create($imageData);
             }
         }
+
+        // Retrieve all item IDs where associated categories have the name 'Room'
+        $itemIds = Item::whereHas('categories', function ($query) {
+            $query->where('name', 'Other');
+        })->pluck('id')->toArray();
+
+        $itemOthers = [];
+        foreach ($itemIds as $itemId) {
+            $itemOthers[$itemId] = [
+                'quantity' => 1, // the items will deduct once. bcz minimun is 1
+            ];
+        }
+        $other->items()->attach($itemOthers); //items
     }
 }

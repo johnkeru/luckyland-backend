@@ -12,7 +12,6 @@ class ItemSeeder extends Seeder
      */
     public function run(): void
     {
-
         $itemsForResort = [
             [
                 'name' => 'Bottled Water',
@@ -115,22 +114,6 @@ class ItemSeeder extends Seeder
             $item->categories()->attach([1, 2]);
         }
 
-        $cottageAddOns = [
-            [
-                'name' => 'Videoke',
-                'price' => 200,
-                'description' => 'Just sing a long',
-                'status' => 'In Stock',
-                'maxQuantity' => 200,
-                'currentQuantity' => 200,
-                'reOrderPoint' => 20,
-            ],
-        ];
-        foreach ($cottageAddOns as $cottageAddOn) {
-            $item = Item::create($cottageAddOn);
-            $item->categories()->attach(5);
-        }
-
         $roomAddOns = [
             [
                 'name' => 'Bed',
@@ -141,13 +124,6 @@ class ItemSeeder extends Seeder
                 'currentQuantity' => 200,
                 'reOrderPoint' => 20,
             ],
-        ];
-        foreach ($roomAddOns as $roomAddOn) {
-            $item = Item::create($roomAddOn);
-            $item->categories()->attach(4);
-        }
-
-        $bothAddOns = [
             [
                 'name' => 'Grill Grate',
                 'price' => 200,
@@ -156,16 +132,15 @@ class ItemSeeder extends Seeder
                 'maxQuantity' => 200,
                 'currentQuantity' => 200,
                 'reOrderPoint' => 20,
-            ],
+            ]
         ];
-        foreach ($bothAddOns as $bothAddOn) {
-            $item = Item::create($bothAddOn);
-            $item->categories()->attach([4, 5,]);
+        foreach ($roomAddOns as $roomAddOn) {
+            $item = Item::create($roomAddOn);
+            $item->categories()->attach(4);
         }
 
 
-        // other
-        $itemsForOther = [
+        $otherAndCottageAddOns = [
             [
                 'name' => 'Grill Grate',
                 'price' => 200,
@@ -185,9 +160,10 @@ class ItemSeeder extends Seeder
                 'reOrderPoint' => 20,
             ],
         ];
-        foreach ($itemsForOther as $itemForOther) {
-            $item = Item::create($itemForOther);
-            $item->categories()->attach(6);
+        foreach ($otherAndCottageAddOns as $otherAndCottageAddOn) {
+            $item = Item::create($otherAndCottageAddOn);
+            $item->categories()->attach([3, 5, 6, 7]);
+            // 6 and 7 is for Other and Other Add Ons.
         }
     }
 }

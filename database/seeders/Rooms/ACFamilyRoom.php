@@ -19,7 +19,7 @@ class ACFamilyRoom extends Seeder
         $roomType = RoomType::create([
             'description' => 'The Family Room offers a warm and welcoming space for your loved ones to gather and unwind. Designed with family in mind, this room provides comfortable accommodations and convenient amenities, ensuring a delightful stay for all ages.',
             'type' => $this->type,
-            'price' => 3500,
+            'price' => 4500,
             'minCapacity' => 4,
             'maxCapacity' => 6,
         ]);

@@ -11,14 +11,16 @@ class ReservationSuggestionsResponse implements Responsable
     protected $others;
     protected $roomAddOns;
     protected $cottageAddOns;
+    protected $otherAddOns;
 
-    public function __construct($rooms, $cottages, $others, $roomAddOns, $cottageAddOns)
+    public function __construct($rooms, $cottages, $others, $roomAddOns, $cottageAddOns, $otherAddOns)
     {
         $this->rooms = $rooms;
         $this->cottages = $cottages;
         $this->others = $others;
         $this->roomAddOns = $roomAddOns;
         $this->cottageAddOns = $cottageAddOns;
+        $this->otherAddOns = $otherAddOns;
     }
 
     public function toResponse($request)
@@ -134,6 +136,14 @@ class ReservationSuggestionsResponse implements Responsable
                 ];
             }),
             'cottageAddOns' => $this->cottageAddOns->map(function ($addOn) {
+                return [
+                    'id' => $addOn->id,
+                    'name' => $addOn->name,
+                    'price' => $addOn->price,
+                    'isOutOfStock' => $addOn->currentQuantity <= 0,
+                ];
+            }),
+            'otherAddOns' => $this->otherAddOns->map(function ($addOn) {
                 return [
                     'id' => $addOn->id,
                     'name' => $addOn->name,

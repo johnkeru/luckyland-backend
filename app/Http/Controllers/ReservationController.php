@@ -477,8 +477,9 @@ class ReservationController extends Controller
 
             $roomAddOns = Item::whereHas('categories', fn ($query) => $query->where('name', 'Room Add Ons'))->get();
             $cottageAddOns = Item::whereHas('categories', fn ($query) => $query->where('name', 'Cottage Add Ons'))->get();
+            $otherAddOns = Item::whereHas('categories', fn ($query) => $query->where('name', 'Other Add Ons'))->get();
 
-            return new ReservationSuggestionsResponse($availableRooms, $availableCottages, $availableOthers, $roomAddOns, $cottageAddOns);
+            return new ReservationSuggestionsResponse($availableRooms, $availableCottages, $availableOthers, $roomAddOns, $cottageAddOns, $otherAddOns);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -502,11 +503,10 @@ class ReservationController extends Controller
             $checkIn =  $validatedData['checkIn'];
             $checkOut =  $validatedData['checkOut'];
 
-            // ITEMS FOR ROOMS INCASE THERE'S NO STOCK ANYMORE FOR CERTAIN AMENETIES
+            // ITEMS FOR ROOMS, COTTAGES, OTHERS INCASE THERE'S NO STOCK ANYMORE FOR CERTAIN ACCOMMODATIONS.
             $roomsNeedStock = [];
             $cottagesNeedStock = [];
             $othersNeedStock = [];
-
 
             $this->isSetAccommodation('cottages', $checkIn, $checkOut);
             $this->isSetAccommodation('rooms', $checkIn, $checkOut);

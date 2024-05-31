@@ -13,6 +13,7 @@ use App\Http\Controllers\OtherController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\UnavailableController;
+use App\Http\Controllers\VisitorController;
 use App\Http\Controllers\WasteController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,9 @@ Route::get('hi', function () {
         'data' => 'the developer of this api is awesome!',
     ]);
 });
+
+Route::get('/visitor', [VisitorController::class, 'show']);
+Route::post('/visitor/increment', [VisitorController::class, 'increment']);
 
 Route::get('faqs', [FAQController::class, 'index']);
 Route::post('faqs', [FAQController::class, 'question']);
@@ -158,7 +162,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::prefix('others')->group(function () {
             Route::post('add-other', [OtherController::class, 'addOther']);
             Route::put('update-other/{other}', [OtherController::class, 'updateOther']);
-            Route::put('update-other-by-type', [OtherController::class, 'updateOthersByType']);
+            Route::put('update-others-by-type', [OtherController::class, 'updateOthersByType']);
         });
     });
 

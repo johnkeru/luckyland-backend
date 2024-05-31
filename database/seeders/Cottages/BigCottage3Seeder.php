@@ -6,6 +6,7 @@ use App\Models\Cottage;
 use App\Models\CottageAttribute;
 use App\Models\CottageImage;
 use App\Models\CottageType;
+use App\Models\Item;
 use Illuminate\Database\Seeder;
 
 class BigCottage3Seeder extends Seeder
@@ -75,6 +76,19 @@ class BigCottage3Seeder extends Seeder
             foreach ($imagesCallback($cottage->id) as $imageData) {
                 CottageImage::create($imageData);
             }
+
+            // Retrieve all item IDs where associated categories have the name 'Room'
+            $itemIds = Item::whereHas('categories', function ($query) {
+                $query->where('name', 'Cottage');
+            })->pluck('id')->toArray();
+
+            $itemCottage = [];
+            foreach ($itemIds as $itemId) {
+                $itemCottage[$itemId] = [
+                    'quantity' => 1, // the items will deduct once. bcz minimun is 1
+                ];
+            }
+            $cottage->items()->attach($itemCottage); //items
         }
     }
 }
