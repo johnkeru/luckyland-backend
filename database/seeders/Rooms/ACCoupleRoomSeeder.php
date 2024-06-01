@@ -52,7 +52,7 @@ class ACCoupleRoomSeeder extends Seeder
                 'type' => $this->type,
             ],
             [
-                'name' => 'Extra Bed (+2 capacity)',
+                'name' => 'Extra Bed (+2 pax)',
                 'type' => $this->type,
             ],
             [
@@ -73,11 +73,19 @@ class ACCoupleRoomSeeder extends Seeder
                 'room_type_id' => $roomTypeId,
                 'images' => fn (int $roomId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716089173/442487600_367902302930391_3012646217232738360_n_kfknoi.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717241900/rooms/coup/ac/IMG20240527101346_zwdfqo.jpg',
                         'room_id' => $roomId
                     ],
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716089202/442494026_367900836263871_890804219610397319_n_rthdry.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717241901/rooms/coup/ac/IMG20240527101500_jwgn5x.jpg',
+                        'room_id' => $roomId
+                    ],
+                    [
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717241900/rooms/coup/ac/IMG20240527101416_ce8upn.jpg',
+                        'room_id' => $roomId
+                    ],
+                    [
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717242413/rooms/coup/ac/IMG20240527101518_m1wn2k.jpg',
                         'room_id' => $roomId
                     ],
                 ]
@@ -87,11 +95,19 @@ class ACCoupleRoomSeeder extends Seeder
                 'room_type_id' => $roomTypeId,
                 'images' => fn (int $roomId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716089173/442487600_367902302930391_3012646217232738360_n_kfknoi.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717241900/rooms/coup/ac/IMG20240527101346_zwdfqo.jpg',
                         'room_id' => $roomId
                     ],
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716089202/442494026_367900836263871_890804219610397319_n_rthdry.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717241901/rooms/coup/ac/IMG20240527101500_jwgn5x.jpg',
+                        'room_id' => $roomId
+                    ],
+                    [
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717241900/rooms/coup/ac/IMG20240527101416_ce8upn.jpg',
+                        'room_id' => $roomId
+                    ],
+                    [
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717242413/rooms/coup/ac/IMG20240527101518_m1wn2k.jpg',
                         'room_id' => $roomId
                     ],
                 ]
@@ -101,11 +117,19 @@ class ACCoupleRoomSeeder extends Seeder
                 'room_type_id' => $roomTypeId,
                 'images' => fn (int $roomId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716089173/442487600_367902302930391_3012646217232738360_n_kfknoi.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717241900/rooms/coup/ac/IMG20240527101346_zwdfqo.jpg',
                         'room_id' => $roomId
                     ],
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716089202/442494026_367900836263871_890804219610397319_n_rthdry.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717241901/rooms/coup/ac/IMG20240527101500_jwgn5x.jpg',
+                        'room_id' => $roomId
+                    ],
+                    [
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717241900/rooms/coup/ac/IMG20240527101416_ce8upn.jpg',
+                        'room_id' => $roomId
+                    ],
+                    [
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717242413/rooms/coup/ac/IMG20240527101518_m1wn2k.jpg',
                         'room_id' => $roomId
                     ],
                 ]
@@ -115,11 +139,19 @@ class ACCoupleRoomSeeder extends Seeder
                 'room_type_id' => $roomTypeId,
                 'images' => fn (int $roomId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716089173/442487600_367902302930391_3012646217232738360_n_kfknoi.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717241900/rooms/coup/ac/IMG20240527101346_zwdfqo.jpg',
                         'room_id' => $roomId
                     ],
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716089202/442494026_367900836263871_890804219610397319_n_rthdry.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717241901/rooms/coup/ac/IMG20240527101500_jwgn5x.jpg',
+                        'room_id' => $roomId
+                    ],
+                    [
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717241900/rooms/coup/ac/IMG20240527101416_ce8upn.jpg',
+                        'room_id' => $roomId
+                    ],
+                    [
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717242413/rooms/coup/ac/IMG20240527101518_m1wn2k.jpg',
                         'room_id' => $roomId
                     ],
                 ]

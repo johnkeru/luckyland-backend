@@ -48,15 +48,19 @@ class PoolSideCottageSeeder2 extends Seeder
     {
         $cottageData = [
             [
-                'name' => 'Poolside Cottage 13',
+                'name' => 'Poolside Cottage 6',
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717201430/cottages/pool%20side%20cottages%201/IMG20240601071502_akizwi.jpg',
                         'cottage_id' => $cottageId
                     ],
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717201550/cottages/pool%20side%20cottages%201/IMG20240601071514_xyrlqb.jpg',
+                        'cottage_id' => $cottageId
+                    ],
+                    [
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717201485/cottages/pool%20side%20cottages%201/IMG20240601071509_d51udi.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]

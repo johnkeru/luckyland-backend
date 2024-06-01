@@ -52,11 +52,7 @@ class GazeeboTypeCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
-                        'cottage_id' => $cottageId
-                    ],
-                    [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717245861/cottages/gazebo/IMG20240601093715_jp9qb5.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]
@@ -66,11 +62,7 @@ class GazeeboTypeCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
-                        'cottage_id' => $cottageId
-                    ],
-                    [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717245877/cottages/gazebo/IMG20240601093723_qd01nf.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]
@@ -80,11 +72,7 @@ class GazeeboTypeCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
-                        'cottage_id' => $cottageId
-                    ],
-                    [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717245882/cottages/gazebo/IMG20240601093848_we56a2.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]
@@ -94,11 +82,7 @@ class GazeeboTypeCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
-                        'cottage_id' => $cottageId
-                    ],
-                    [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717245874/cottages/gazebo/IMG20240601093811_ti6r3b.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]
@@ -108,11 +92,7 @@ class GazeeboTypeCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
-                        'cottage_id' => $cottageId
-                    ],
-                    [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717245867/cottages/gazebo/IMG20240601093741_o725so.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]
@@ -122,11 +102,7 @@ class GazeeboTypeCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
-                        'cottage_id' => $cottageId
-                    ],
-                    [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717245866/cottages/gazebo/IMG20240601093707_r7xivx.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]
@@ -136,11 +112,7 @@ class GazeeboTypeCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
-                        'cottage_id' => $cottageId
-                    ],
-                    [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717245861/cottages/gazebo/IMG20240601093715_jp9qb5.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]
@@ -150,11 +122,7 @@ class GazeeboTypeCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
-                        'cottage_id' => $cottageId
-                    ],
-                    [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717245869/cottages/gazebo/IMG20240601093803_ply02b.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]

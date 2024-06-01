@@ -52,13 +52,14 @@ class TreeHouseSeeder extends Seeder
                 'other_type_id' => $otherTypeId,
                 'images' => fn (int $otherId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717244425/others/IMG20240601093935_l0lxzq.jpg',
                         'other_id' => $otherId
                     ],
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717244427/others/IMG20240601093946_ewzynd.jpg',
                         'other_id' => $otherId
                     ],
+
                 ]
             ],
             [
@@ -66,13 +67,14 @@ class TreeHouseSeeder extends Seeder
                 'other_type_id' => $otherTypeId,
                 'images' => fn (int $otherId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717244425/others/IMG20240601093935_l0lxzq.jpg',
                         'other_id' => $otherId
                     ],
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717244427/others/IMG20240601093946_ewzynd.jpg',
                         'other_id' => $otherId
                     ],
+
                 ]
             ],
         ];

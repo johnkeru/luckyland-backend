@@ -19,6 +19,7 @@ class Reservation extends Model
 
         'totalRoomsPrice',
         'totalCottagesPrice',
+        'totalOthersPrice',
         'days',
         'accommodationType',
 

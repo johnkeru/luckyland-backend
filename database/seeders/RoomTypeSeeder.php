@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Database\Seeders\Rooms\ACCoupleRoomSeeder;
 use Database\Seeders\Rooms\ACFamilyRoom;
 use Database\Seeders\Rooms\EFCoupleRoomSeeder;
-use Database\Seeders\Rooms\EFFamilyRoom;
+use Database\Seeders\Rooms\ACFamilyRoom2;
 use Illuminate\Database\Seeder;
 
 class RoomTypeSeeder extends Seeder
@@ -15,6 +15,6 @@ class RoomTypeSeeder extends Seeder
         $this->call(ACCoupleRoomSeeder::class);
         $this->call(EFCoupleRoomSeeder::class);
         $this->call(ACFamilyRoom::class);
-        $this->call(EFFamilyRoom::class);
+        $this->call(ACFamilyRoom2::class);
     }
 }

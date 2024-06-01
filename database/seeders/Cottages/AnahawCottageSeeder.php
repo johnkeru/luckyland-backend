@@ -53,11 +53,11 @@ class AnahawCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717202344/cottages/anahaw/IMG20240601071900_vhaq9w.jpg',
                         'cottage_id' => $cottageId
                     ],
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717202322/cottages/anahaw/IMG20240601071909_xcbdye.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]
@@ -67,11 +67,11 @@ class AnahawCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717202321/cottages/anahaw/IMG20240601071924_rhyw3b.jpg',
                         'cottage_id' => $cottageId
                     ],
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717202346/cottages/anahaw/IMG20240601071915_mmit8n.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]
@@ -81,11 +81,11 @@ class AnahawCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717202351/cottages/anahaw/IMG20240601071937_afma4a.jpg',
                         'cottage_id' => $cottageId
                     ],
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717202314/cottages/anahaw/IMG20240601071943_lb1rbs.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]
@@ -95,11 +95,11 @@ class AnahawCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717202335/cottages/anahaw/IMG20240601072013_dacvtw.jpg',
                         'cottage_id' => $cottageId
                     ],
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717202328/cottages/anahaw/IMG20240601072019_zhibx2.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]
@@ -109,11 +109,11 @@ class AnahawCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717202343/cottages/anahaw/IMG20240601072038_ivyy5z.jpg',
                         'cottage_id' => $cottageId
                     ],
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717202338/cottages/anahaw/IMG20240601072040_bf5vh5.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]
@@ -123,11 +123,7 @@ class AnahawCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
-                        'cottage_id' => $cottageId
-                    ],
-                    [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717202329/cottages/anahaw/IMG20240601072027_t4c6gv.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]

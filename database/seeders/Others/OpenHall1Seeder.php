@@ -73,11 +73,11 @@ class OpenHall1Seeder extends Seeder
                 'other_type_id' => $otherTypeId,
                 'images' => fn (int $otherId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717244429/others/IMG20240601094043_zljkdl.jpg',
                         'other_id' => $otherId
                     ],
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717244426/others/IMG20240601094054_yyrtuc.jpg',
                         'other_id' => $otherId
                     ],
                 ]

@@ -52,11 +52,7 @@ class DuplexCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
-                        'cottage_id' => $cottageId
-                    ],
-                    [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717245897/cottages/duplex/IMG20240601093247_xzjpts.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]
@@ -66,11 +62,7 @@ class DuplexCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
-                        'cottage_id' => $cottageId
-                    ],
-                    [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717245897/cottages/duplex/IMG20240601093239_xsjpwd.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]
@@ -80,11 +72,7 @@ class DuplexCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
-                        'cottage_id' => $cottageId
-                    ],
-                    [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717245873/cottages/duplex/IMG20240601093242_poydzc.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]
@@ -94,11 +82,7 @@ class DuplexCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
-                        'cottage_id' => $cottageId
-                    ],
-                    [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717245867/cottages/duplex/IMG20240601093322_krel8c.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]
@@ -108,11 +92,7 @@ class DuplexCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
-                        'cottage_id' => $cottageId
-                    ],
-                    [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717245863/cottages/duplex/IMG20240601093255_cn49jd.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]
@@ -122,11 +102,7 @@ class DuplexCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
-                        'cottage_id' => $cottageId
-                    ],
-                    [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717245897/cottages/duplex/IMG20240601093247_xzjpts.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]
@@ -136,11 +112,7 @@ class DuplexCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
-                        'cottage_id' => $cottageId
-                    ],
-                    [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717245897/cottages/duplex/IMG20240601093239_xsjpwd.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]
@@ -150,11 +122,7 @@ class DuplexCottageSeeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
-                        'cottage_id' => $cottageId
-                    ],
-                    [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717245873/cottages/duplex/IMG20240601093242_poydzc.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]

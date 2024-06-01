@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cottage;
 use App\Models\Item;
+use App\Models\Other;
 use App\Models\Reservation;
 use App\Models\Room;
 use App\Models\Unavailable;
@@ -13,30 +14,28 @@ use Illuminate\Support\Facades\DB;
 class DashboardController extends Controller
 {
 
+    function countAvailableItems($model, $checkIn, $checkOut)
+    {
+        return $model::where('active', true)
+            ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
+                $query->whereIn('status', ['Approved', 'In Resort'])
+                    ->where(function ($q) use ($checkIn, $checkOut) {
+                        $q->where('checkIn', '<', $checkOut)
+                            ->where('checkOut', '>', $checkIn);
+                    });
+            })
+            ->count();
+    }
+
+
     public function todayOverview()
     {
         $checkIn = now();
         $checkOut = now();
 
-        $availableRooms = Room::where('active', true)
-            ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
-                $query->whereIn('status', ['Approved', 'In Resort'])
-                    ->where(function ($q) use ($checkIn, $checkOut) {
-                        $q->where('checkIn', '<', $checkOut)
-                            ->where('checkOut', '>', $checkIn);
-                    });
-            })
-            ->count();
-
-        $availableCottages = Cottage::where('active', true)
-            ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
-                $query->whereIn('status', ['Approved', 'In Resort'])
-                    ->where(function ($q) use ($checkIn, $checkOut) {
-                        $q->where('checkIn', '<', $checkOut)
-                            ->where('checkOut', '>', $checkIn);
-                    });
-            })
-            ->count();
+        $availableRooms = $this->countAvailableItems(Room::class, $checkIn, $checkOut);
+        $availableCottages = $this->countAvailableItems(Cottage::class, $checkIn, $checkOut);
+        $availableOthers = $this->countAvailableItems(Other::class, $checkIn, $checkOut);
 
         $totalGuests = Reservation::where(function ($query) use ($checkIn) {
             $query->whereDate('checkIn', $checkIn)
@@ -49,6 +48,7 @@ class DashboardController extends Controller
             'guests' => $totalGuests,
             'rooms' => $availableRooms,
             'cottages' => $availableCottages,
+            'others' => $availableOthers,
         ];
     }
 
