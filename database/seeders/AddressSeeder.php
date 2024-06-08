@@ -19,7 +19,8 @@ class AddressSeeder extends Seeder
             'province' => fake()->state,
         ]);
 
-        $user = User::find(1);
-        $user->address()->save($address);
+        foreach (User::all() as $user) {
+            $user->address()->save($address);
+        }
     }
 }

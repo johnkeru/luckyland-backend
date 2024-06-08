@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Mail;
 class EmailCustomerAndAdmin
 {
 
-    use \App\Traits\ReservationTrait;
+    use \App\Traits\Reservation\ReservationTrait;
     /**
      * Create the event listener.
      */
@@ -25,12 +25,32 @@ class EmailCustomerAndAdmin
      */
     public function handle(CustomerJustReserved $event): void
     {
+        $roomAddOns = $event->reservation->rooms()->with(['items' => function ($query) use ($event) {
+            $query->whereHas('categories', function ($query) {
+                $query->where('name', 'Room Add Ons')
+                    ->whereNot('name', 'Room');
+            })->where('reservation_id', $event->reservation->id);
+        }])->get();
+        $cottageAddOns = $event->reservation->cottages()->with(['items' => function ($query) use ($event) {
+            $query->whereHas('categories', function ($query) {
+                $query->where('name', 'Cottage Add Ons')
+                    ->whereNot('name', 'Cottage');
+            })->where('reservation_id', $event->reservation->id);
+        }])->get();
+        $otherAddOns = $event->reservation->others()->with(['items' => function ($query) use ($event) {
+            $query->whereHas('categories', function ($query) {
+                $query->where('name', 'Other Add Ons')
+                    ->whereNot('name', 'Other');
+            })->where('reservation_id', $event->reservation->id);
+        }])->get();
+
         $recipient = $event->reservation->customer->email;
         $arrivalTime = "2:00pm";
         $departureTime = "12:00pm";
         $arrivalDate = \Carbon\Carbon::parse($event->reservation->checkIn)->format('F j');
         $departureDate = \Carbon\Carbon::parse($event->reservation->checkOut)->format('F j');
         $emailContent = [
+            'guests' => $event->reservation->guests,
             'reservationHASH' => $event->reservation->reservationHASH,
             'arrivalDateTime' => "$arrivalDate at $arrivalTime",
             'departureDateTime' => "$departureDate at $departureTime",
@@ -39,10 +59,10 @@ class EmailCustomerAndAdmin
             'balance' => number_format($event->reservation->balance, 2),
             'status' => 'Approved',
             'customerName' => $event->reservation->customer->firstName . ' ' . $event->reservation->customer->lastName,
-            'rooms' => $event->reservation->rooms,
-            'cottages' => $event->reservation->cottages, //(optional),
-            'others' => $event->reservation->others, //(optional),
-            'rescheduleLink' => $this->generateTokenLinkForReschedule($event->reservation, $recipient)
+            'rescheduleLink' => $this->generateTokenLinkForReschedule($event->reservation, $recipient),
+            'roomAddOns' => $roomAddOns,
+            'cottageAddOns' => $cottageAddOns,
+            'otherAddOns' => $otherAddOns,
         ];
         if (env('APP_PROD')) {
             Mail::to($recipient)->send(new SuccessfulReservationWRescheduleMail($emailContent));
@@ -52,14 +72,15 @@ class EmailCustomerAndAdmin
             $query->where('roleName', 'Front Desk');
         })->pluck('email');
         $emailContentForAllFrontDesks = [
+            'guests' => $emailContent['guests'],
             'reservationHASH' => $emailContent['reservationHASH'],
             'arrivalDateTime' => "$arrivalDate at $arrivalTime",
             'departureDateTime' => "$departureDate at $departureTime",
             'email' => $recipient,
             'customerName' => $emailContent['customerName'],
-            'rooms' => $emailContent['rooms'],
-            'cottages' => $emailContent['cottages'], //(optional),
-            'others' => $emailContent['others'],
+            'roomAddOns' => $emailContent['roomAddOns'],
+            'cottageAddOns' => $emailContent['cottageAddOns'],
+            'otherAddOns' => $emailContent['otherAddOns'],
             'rescheduleLink' => $emailContent['rescheduleLink'],
 
             'total' => $emailContent['total'],

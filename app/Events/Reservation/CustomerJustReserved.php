@@ -18,7 +18,8 @@ class CustomerJustReserved
     public function __construct(
         public Reservation $reservation,
         public $roomsNeedStock = null,
-        public $cottagesNeedStock = null
+        public $cottagesNeedStock = null,
+        public $othersNeedStock = null
     ) {
         //
     }

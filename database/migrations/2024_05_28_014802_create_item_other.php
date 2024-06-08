@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('quantity')->default(1);
             $table->integer('needStock')->default(0); // this will only set IF item quantity can't fill the room need anymore.
+            $table->integer('reservation_id')->nullable();
             $table->foreignId('other_id')->constrained('others')->onDelete('cascade');
             $table->foreignId('item_id')->constrained('items')->onDelete('cascade');
         });

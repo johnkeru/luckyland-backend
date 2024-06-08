@@ -7,19 +7,22 @@
     <title>Reservation Confirmation</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Georgia', serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background: url('https://example.com/resort-background.jpg') no-repeat center center fixed;
+            /* Replace with your image URL */
+            background-size: cover;
+            color: #333;
         }
 
         .container {
             max-width: 600px;
-            margin: 20px auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 40px auto;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
 
         .header {
@@ -28,15 +31,50 @@
         }
 
         .header h2 {
-            color: #333;
+            color: #444444;
+            font-size: 24px;
+            margin: 0;
         }
 
-        /* .reservation-info {
-            margin-bottom: 20px;
-        } */
-
         .reservation-info p {
-            color: #666;
+            color: #555555;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        .reservation-info p strong {
+            color: #333333;
+        }
+
+        .reservation-info ul {
+            padding-left: 20px;
+            margin: 10px 0;
+            list-style: none;
+        }
+
+        .reservation-info ul li {
+            color: #555555;
+            font-size: 16px;
+            margin: 5px 0;
+        }
+
+        .reservation-info ul li ul {
+            padding-left: 20px;
+        }
+
+        .reservation-info ul li ul li {
+            color: #666666;
+            font-size: 14px;
+        }
+
+        .link {
+            color: #0066cc;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .link:hover {
+            text-decoration: underline;
         }
 
         .footer {
@@ -45,12 +83,51 @@
         }
 
         .footer p {
-            color: #888;
+            color: #777777;
+            font-size: 14px;
+            margin: 10px 0;
         }
 
-        .link {
-            color: blue;
+        .footer p a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        .footer p a:hover {
             text-decoration: underline;
+        }
+
+        .card {
+            background-color: #ffffff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-item {
+            margin: 10px 0;
+            color: #555555;
+            font-size: 16px;
+        }
+
+        .highlight {
+            background-color: #f5f5f5;
+            border-left: 5px solid #ffcc00;
+            padding-left: 15px;
+        }
+
+        .sub-item {
+            margin-left: 20px;
+            color: #666666;
+            font-size: 14px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            color: #333333;
+            margin: 10px 0;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -63,37 +140,74 @@
         <div class="reservation-info">
             <p><strong>Reservation ID:</strong> {{ $data['reservationHASH'] }}</p>
             <p><strong>Customer:</strong> {{ $data['customerName'] }}</p>
+            <p><strong>Guests:</strong> {{ $data['guests'] }}</p>
             <p><strong>Arrival Date and Time:</strong> {{ $data['arrivalDateTime'] }}</p>
             <p><strong>Departure Date and Time:</strong> {{ $data['departureDateTime'] }}</p>
 
-            @if (isset($data['rooms']) && count($data['rooms']) > 0)
-                <p><strong>Rooms:</strong></p>
-                <ul>
-                    @foreach ($data['rooms'] as $room)
-                        <li><strong>Name:</strong> {{ $room['name'] }}, <strong>Type:</strong>
-                            {{ $room['roomType']['type'] }}</li>
-                    @endforeach
-                </ul>
+            @if (isset($data['roomAddOns']) && count($data['roomAddOns']) > 0)
+                <div class="card">
+                    <p><strong>Rooms:</strong></p>
+                    <ul>
+                        @foreach ($data['roomAddOns'] as $room)
+                            <li class="card-item highlight">
+                                <strong>Name:</strong> {{ $room->name }},
+                                <strong>Type:</strong> {{ $room->roomType->type }}
+                                @if ($room->items->count() > 0)
+                                    <p class="section-title">Add Ons</p> <!-- Add Ons title -->
+                                    <ul>
+                                        @foreach ($room->items as $item)
+                                            <li class="sub-item"><strong>Item:</strong> {{ $item->name }}</li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
             @endif
 
-            @if (isset($data['cottages']) && count($data['cottages']) > 0)
-                <p><strong>Cottages:</strong></p>
-                <ul>
-                    @foreach ($data['cottages'] as $cottage)
-                        <li><strong>Name:</strong> {{ $cottage['name'] }}, <strong>Type:</strong>
-                            {{ $cottage['cottageType']['type'] }}</li>
-                    @endforeach
-                </ul>
+            @if (isset($data['cottageAddOns']) && count($data['cottageAddOns']) > 0)
+                <div class="card">
+                    <p><strong>Cottages:</strong></p>
+                    <ul>
+                        @foreach ($data['cottageAddOns'] as $cottage)
+                            <li class="card-item highlight">
+                                <strong>Name:</strong> {{ $cottage->name }},
+                                <strong>Type:</strong> {{ $cottage->cottageType->type }}
+                                @if ($cottage->items->count() > 0)
+                                    <p class="section-title">Add Ons</p> <!-- Add Ons title -->
+                                    <ul>
+                                        @foreach ($cottage->items as $item)
+                                            <li class="sub-item"><strong>Item:</strong> {{ $item->name }}</li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
             @endif
 
-            @if (isset($data['others']) && count($data['others']) > 0)
-                <p><strong>Others:</strong></p>
-                <ul>
-                    @foreach ($data['others'] as $other)
-                        <li><strong>Name:</strong> {{ $other['name'] }}, <strong>Type:</strong>
-                            {{ $other['otherType']['type'] }}</li>
-                    @endforeach
-                </ul>
+            @if (isset($data['otherAddOns']) && count($data['otherAddOns']) > 0)
+                <div class="card">
+                    <p><strong>Others:</strong></p>
+                    <ul>
+                        @foreach ($data['otherAddOns'] as $other)
+                            <li class="card-item highlight">
+                                <strong>Name:</strong> {{ $other->name }},
+                                <strong>Type:</strong> {{ $other->otherType->type }}
+                                @if ($other->items->count() > 0)
+                                    <p class="section-title">Add Ons</p> <!-- Add Ons title -->
+                                    <ul>
+                                        @foreach ($other->items as $item)
+                                            <li class="sub-item"><strong>Item:</strong> {{ $item->name }}</li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
             @endif
 
             <p><strong>Total:</strong> ₱{{ $data['total'] }}</p>
@@ -103,7 +217,6 @@
         </div>
         <div class="footer">
             <p>Please note that your reservation will be canceled if you do not arrive between 2pm and 8pm.</p>
-            {{-- Reschedule Link --}}
             <p>If you wish to reschedule your reservation, you can do so <a href="{{ $data['rescheduleLink'] }}"
                     class="link">here</a>.</p>
             <p>If you have any questions or need assistance, feel free to contact us at <a

@@ -37,6 +37,7 @@ class Item extends Model
         'currentQuantity',
         'status',
         'lastCheck',
+        'isConsumable',
     ];
 
 
@@ -87,11 +88,15 @@ class Item extends Model
     }
     function rooms()
     {
-        return $this->belongsToMany(Room::class)->withPivot(['minQuantity', 'maxQuantity', 'isBed', 'needStock']);
+        return $this->belongsToMany(Room::class)->withPivot(['minQuantity', 'maxQuantity', 'isBed', 'needStock', 'reservation_id']);
     }
     function cottages()
     {
-        return $this->belongsToMany(Cottage::class)->withPivot(['quantity', 'needStock']);
+        return $this->belongsToMany(Cottage::class)->withPivot(['quantity', 'needStock', 'reservation_id']);
+    }
+    function others()
+    {
+        return $this->belongsToMany(Other::class)->withPivot(['quantity', 'needStock', 'reservation_id']);
     }
 
 

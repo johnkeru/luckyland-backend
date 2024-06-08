@@ -15,7 +15,7 @@ class FAQController extends Controller
 
     public function noAnswersFAQs()
     {
-        $top5Faqs = FAQ::whereNull('answer')->limit(5)->latest()->get();
+        $top5Faqs = FAQ::limit(5)->latest()->get();
         return response()->json(['success' => true, 'data' => $top5Faqs], 200);
     }
 

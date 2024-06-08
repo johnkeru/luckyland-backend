@@ -31,6 +31,7 @@ Route::get('faqs', [FAQController::class, 'index']);
 Route::post('faqs', [FAQController::class, 'question']);
 Route::get('settings/faqs', [FAQController::class, 'noAnswersFAQs']);
 Route::post('settings/faqs/{faq}/answer', [FAQController::class, 'answer']);
+Route::get('categories', [InventoryController::class, 'getCategories']);
 
 Route::prefix('landing')->group(function () {
     Route::get('accommodations', [RoomController::class, 'landingAccommodations']);
@@ -83,7 +84,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware(['all_roles'])->group(function () {
         Route::get('inventories', [InventoryController::class, 'index']);
         Route::get('returned-items/{id}', [InventoryController::class, 'returnedItems']);
-        Route::get('categories', [InventoryController::class, 'getCategories']);
         Route::get('roles', [UserController::class, 'getRoles']);
         Route::get('deliveries', [DeliveryController::class, 'index']);
         Route::get('customers', [CustomerController::class, 'index']);

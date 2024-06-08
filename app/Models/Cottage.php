@@ -25,7 +25,7 @@ class Cottage extends Model
     }
     function items()
     {
-        return $this->belongsToMany(Item::class)->withPivot(['quantity', 'needStock']);
+        return $this->belongsToMany(Item::class)->withPivot(['quantity', 'needStock', 'reservation_id']);
     }
     function cottageType()
     {

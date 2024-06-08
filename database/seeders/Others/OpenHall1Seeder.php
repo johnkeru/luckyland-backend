@@ -17,7 +17,7 @@ class OpenHall1Seeder extends Seeder
     {
         $this->setAttributes(); // initialize the attributes.
         $otherType = OtherType::create([
-            'description' => 'A spacious retreat with a capacity for 120 guests, ideal for gatherings and relaxation.',
+            'description' => 'A spacious retreat with a capacity for 120 guests, ideal for gatherings, birthdays, weddings, and other special events.',
             'type' => $this->type,
             'price' => 10000,
             'capacity' => 120,
@@ -73,11 +73,23 @@ class OpenHall1Seeder extends Seeder
                 'other_type_id' => $otherTypeId,
                 'images' => fn (int $otherId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717244429/others/IMG20240601094043_zljkdl.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717810080/others/Open%20Hall/IMG20240604072237_h3ovxg.jpg',
                         'other_id' => $otherId
                     ],
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717244426/others/IMG20240601094054_yyrtuc.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717810079/others/Open%20Hall/IMG20240604072253_ia0klp.jpg',
+                        'other_id' => $otherId
+                    ],
+                    [
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717810082/others/Open%20Hall/IMG20240604072401_ia2acq.jpg',
+                        'other_id' => $otherId
+                    ],
+                    [
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717810079/others/Open%20Hall/IMG20240604072317_jewqbv.jpg',
+                        'other_id' => $otherId
+                    ],
+                    [
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717810080/others/Open%20Hall/IMG20240604072358_itseww.jpg',
                         'other_id' => $otherId
                     ],
                 ]

@@ -57,11 +57,15 @@ class BigCottage3Seeder extends Seeder
                 'cottage_type_id' => $cottageTypeId,
                 'images' => fn (int $cottageId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088997/441349048_367900629597225_4736797796269193821_n_vnhcnr.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717810199/cottages/Big%20Cottages/Big%20Cottage%203/IMG20240604071958_dayts8.jpg',
                         'cottage_id' => $cottageId
                     ],
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1716088954/441550028_367900606263894_1442755070444327851_n_hdwxji.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717810202/cottages/Big%20Cottages/Big%20Cottage%203/IMG20240604072036_cnn4rv.jpg',
+                        'cottage_id' => $cottageId
+                    ],
+                    [
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717810199/cottages/Big%20Cottages/Big%20Cottage%203/IMG20240604072046_btwrqi.jpg',
                         'cottage_id' => $cottageId
                     ],
                 ]

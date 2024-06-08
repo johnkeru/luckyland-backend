@@ -48,7 +48,7 @@ class TreeHouseSeeder extends Seeder
     {
         $otherData = [
             [
-                'name' => 'Tree House 1',
+                'name' => 'Tree House',
                 'other_type_id' => $otherTypeId,
                 'images' => fn (int $otherId) => [
                     [
@@ -62,21 +62,21 @@ class TreeHouseSeeder extends Seeder
 
                 ]
             ],
-            [
-                'name' => 'Tree House 2',
-                'other_type_id' => $otherTypeId,
-                'images' => fn (int $otherId) => [
-                    [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717244425/others/IMG20240601093935_l0lxzq.jpg',
-                        'other_id' => $otherId
-                    ],
-                    [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717244427/others/IMG20240601093946_ewzynd.jpg',
-                        'other_id' => $otherId
-                    ],
+            // [
+            //     'name' => 'Tree House 2',
+            //     'other_type_id' => $otherTypeId,
+            //     'images' => fn (int $otherId) => [
+            //         [
+            //             'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717244425/others/IMG20240601093935_l0lxzq.jpg',
+            //             'other_id' => $otherId
+            //         ],
+            //         [
+            //             'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717244427/others/IMG20240601093946_ewzynd.jpg',
+            //             'other_id' => $otherId
+            //         ],
 
-                ]
-            ],
+            //     ]
+            // ],
         ];
 
 

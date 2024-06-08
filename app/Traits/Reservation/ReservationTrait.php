@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Traits;
+namespace App\Traits\Reservation;
 
 use App\Models\Cottage;
 use App\Models\Other;
@@ -207,13 +207,13 @@ trait ReservationTrait
     public function isSetAccommodation($key, $checkIn, $checkOut)
     {
         if (isset($validatedData[$key])) {
-            $cottageIds = array_column($validatedData[$key], 'id');
+            $ids = array_column($validatedData[$key], 'id');
             if ($key === 'cottages') {
-                $availabilityResult = $this->validateCottageAvailability($cottageIds, $checkIn, $checkOut);
+                $availabilityResult = $this->validateCottageAvailability($ids, $checkIn, $checkOut);
             } elseif ($key === 'rooms') {
-                $availabilityResult = $this->validateRoomAvailability($cottageIds, $checkIn, $checkOut);
+                $availabilityResult = $this->validateRoomAvailability($ids, $checkIn, $checkOut);
             } else {
-                $availabilityResult = $this->validateOtherAvailability($cottageIds, $checkIn, $checkOut);
+                $availabilityResult = $this->validateOtherAvailability($ids, $checkIn, $checkOut);
             }
             if ($availabilityResult !== false) {
                 return $availabilityResult;

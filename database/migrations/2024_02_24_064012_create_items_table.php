@@ -24,6 +24,7 @@ return new class extends Migration
             $table->integer('reOrderPoint')->default(15); // Minimum quantity for reorder - Notification will comes in.
             $table->timestamp('lastCheck')->default(now());
             $table->boolean('isBorrowable')->default(false);
+            $table->boolean('isConsumable')->default(false);
 
             $table->foreignId('delivery_id')->nullable()->constrained('deliveries')->onDelete('set null');
             $table->timestamps();
