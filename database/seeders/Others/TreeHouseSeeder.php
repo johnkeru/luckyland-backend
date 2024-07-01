@@ -52,11 +52,11 @@ class TreeHouseSeeder extends Seeder
                 'other_type_id' => $otherTypeId,
                 'images' => fn (int $otherId) => [
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717244425/others/IMG20240601093935_l0lxzq.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1718090752/others/Tree%20House/IMG20240604072453_xepb3p.jpg',
                         'other_id' => $otherId
                     ],
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717244427/others/IMG20240601093946_ewzynd.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1718090752/others/Tree%20House/IMG20240604072510_yrgzew.jpg',
                         'other_id' => $otherId
                     ],
 

@@ -14,6 +14,12 @@ class ReservationProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // $this->app->singleton(ReservationInterface::class, function($app){
+        //     return new ReservationRepository();
+        // });
+        // $this->app->singleton(ReservationInterface::class, function ($app) {
+        //     $app->make(ReservationRepository::class);
+        // });
         $this->app->bind(ReservationInterface::class, ReservationRepository::class);
     }
 

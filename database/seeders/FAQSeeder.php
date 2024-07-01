@@ -11,33 +11,34 @@ class FAQSeeder extends Seeder
     {
         // Define the most commonly asked questions
         $commonQuestions = [
+
             [
                 'question' => 'What payment methods do you accept?',
-                'answer' => 'We accept GCash as our primary payment method.',
-                'display' => true,
-                'email' => fake()->email
-            ],
-            [
-                'question' => 'What is your return policy?',
-                'answer' => 'Our return policy allows returns within 30 days of purchase with proof of receipt.',
-                'display' => true,
-                'email' => fake()->email
-            ],
-            [
-                'question' => 'How do I track my order?',
-                'answer' => 'You can track your order by logging into your account or using the tracking number provided in your confirmation email.',
-                'display' => true,
-                'email' => fake()->email
-            ],
-            [
-                'question' => 'Do you offer international shipping?',
-                'answer' => 'Yes, we offer international shipping to most countries. Shipping rates may vary.',
+                'answer' => 'We currently accept GCash as our primary payment method. For walk-in guests, we also accept cash payments.',
                 'display' => true,
                 'email' => fake()->email
             ],
             [
                 'question' => 'What is your customer support contact information?',
-                'answer' => 'You can reach our customer support team at support@example.com or by phone at 1-800-555-1234.',
+                'answer' => 'You can reach our customer support at Luckyland.resort58@gmail.com, FB Page or by phone at (Globe) 0915-6332893 or (Smart) 0968-5290685.',
+                'display' => true,
+                'email' => fake()->email
+            ],
+            [
+                'question' => 'Pwede po ba ireschedule ang pagbook?',
+                'answer' => 'Yes, after you successfully reserve, we will send you an email with information about the reservation details, as well as a link to reschedule.',
+                'display' => true,
+                'email' => fake()->email
+            ],
+            [
+                'question' => 'Makakakuha ba ako ng refund kung ika-cancel ko ang aking reservation?',
+                'answer' => "Thank you for your question. Unfortunately, we do not offer refunds for canceled reservations. However, we would be happy to assist you with rescheduling your stay to a later date that suits you better.",
+                'display' => true,
+                'email' => fake()->email
+            ],
+            [
+                'question' => 'Has the chlorine issue been resolved in your pools?',
+                'answer' => 'We have taken steps to address any previous issues with chlorine levels in our pools. Our maintenance team regularly monitors and adjusts chlorine levels to ensure they are within safe and comfortable limits for our guests. If you have any concerns during your visit, please notify our staff immediately so we can promptly address them.',
                 'display' => true,
                 'email' => fake()->email
             ],

@@ -211,14 +211,14 @@
             @endif
 
             <p><strong>Total:</strong> ₱{{ $data['total'] }}</p>
-            <p><strong>Paid:</strong> ₱{{ $data['paid'] }}</p>
+            <p><strong>Initial Payment:</strong> ₱{{ $data['paid'] }}</p>
             <p><strong>Balance:</strong> ₱{{ $data['balance'] }}</p>
             <p><strong>Status:</strong> {{ $data['status'] }}</p>
         </div>
         <div class="footer">
             <p>Please note that your reservation will be canceled if you do not arrive between 2pm and 8pm.</p>
-            <p>If you wish to reschedule your reservation, you can do so <a href="{{ $data['rescheduleLink'] }}"
-                    class="link">here</a>.</p>
+            <p>If you wish to reschedule or cancel your reservation, you can do so <a
+                    href="{{ $data['rescheduleLink'] }}" class="link">here</a>.</p>
             <p>If you have any questions or need assistance, feel free to contact us at <a
                     href="mailto:Luckyland.resort58@gmail.com" class="link">Luckyland.resort58@gmail.com</a>.</p>
             <p>We look forward to welcoming you!</p>

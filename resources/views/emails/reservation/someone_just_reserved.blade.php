@@ -203,11 +203,11 @@
             @endif
 
             <p><strong>Total:</strong> ₱{{ $data['total'] }}</p>
-            <p><strong>Paid:</strong> ₱{{ $data['paid'] }}</p>
+            <p><strong>Initial Payment:</strong> ₱{{ $data['paid'] }}</p>
             <p><strong>Balance:</strong> ₱{{ $data['balance'] }}</p>
             <p><strong>Status:</strong> {{ $data['status'] }}</p>
 
-            <p>If needed, the reservation can be rescheduled <a href="{{ $data['rescheduleLink'] }}"
+            <p>If needed, the reservation can be rescheduled or cancelled <a href="{{ $data['rescheduleLink'] }}"
                     class="link">here</a>.</p>
         </div>
         <div class="footer">

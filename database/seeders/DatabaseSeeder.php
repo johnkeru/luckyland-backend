@@ -58,22 +58,25 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('keru'),
                 'remember_token' => Str::random(10),
             ],
-            // [
-            //     'firstName' => 'Jun',
-            //     'middleName' => 'P.',
-            //     'lastName' => 'Triñanes',
-            //     'email' => 'vstjr7672@gmail.com',
-            //     'phoneNumber' => '09876543210',
-            //     'graduated_at' => 'Bicol University',
-            //     'description' => "Developer",
-            //     'facebook' => 'https://www.facebook.com/jun.trinanes.1',
-            //     'email_verified_at' => now(),
-            //     'password' => Hash::make('vstjr7672'),
-            //     'remember_token' => Str::random(10),
-            // ],
+            [
+                'firstName' => 'Jun',
+                'middleName' => 'P.',
+                'lastName' => 'Triñanes',
+                'email' => 'vstjr7672@gmail.com',
+                'phoneNumber' => '09876543210',
+                'graduated_at' => 'Bicol University',
+                'description' => "Developer",
+                'facebook' => 'https://www.facebook.com/jun.trinanes.1',
+                'email_verified_at' => now(),
+                'password' => Hash::make('vstjr7672'),
+                'remember_token' => Str::random(10),
+            ],
         ];
 
         User::insert($users);
+
+        // it will create a status for resort. default to true(open)
+        $this->call(ResortStatusSeeder::class);
 
         $this->call(RoleSeeder::class);
 

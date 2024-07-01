@@ -47,14 +47,11 @@
 <body>
 
     <div class="container">
-        <p>Dear {{ $data['name'] }},<br><br>We regret to inform you that your reservation has been cancelled. Please
-            contact us if you have any questions or concerns.<br><br>Thank you,<br>LuckyLand Resort</p>
+        <p>The reservation for {{ $data['name'] }} has been cancelled. Please update the booking system
+            accordingly.
+        </p>
         {{-- <p><strong>Refund:</strong> ₱{{$data['refund']}}</p> --}}
-        <p>If you have any questions or need assistance, feel free to contact us at <a
-                href="mailto:Luckyland.resort58@gmail.com" class="link">Luckyland.resort58@gmail.com</a>.</p>
-        <p>We apologize for any inconvenience caused.</p>
     </div>
-
 
 </body>
 

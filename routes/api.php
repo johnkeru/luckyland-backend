@@ -11,6 +11,7 @@ use App\Http\Controllers\FAQController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\OtherController;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\ResortStatusController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\UnavailableController;
 use App\Http\Controllers\VisitorController;
@@ -23,6 +24,8 @@ Route::get('hi', function () {
         'data' => 'the developer of this api is awesome!',
     ]);
 });
+
+Route::get('/status/get-resort-status', [ResortStatusController::class, 'getResortStatus']);
 
 Route::get('/visitor', [VisitorController::class, 'show']);
 Route::post('/visitor/increment', [VisitorController::class, 'increment']);
@@ -44,6 +47,9 @@ Route::prefix('landing')->group(function () {
 
 // customer
 Route::prefix('reservations')->group(function () {
+    // from admin to customer because customer now has power to cancel their reservation.
+    Route::post('cancel-reservation/{reservationId}', [ReservationController::class, 'cancelReservation']);
+
     Route::post('unavailable-dates-by-rooms', [ReservationController::class, 'getUnavailableDatesByRooms']);
     Route::post('unavailable-dates-by-cottages', [ReservationController::class, 'getUnavailableDatesByCottages']);
     Route::post('unavailable-dates-by-others', [ReservationController::class, 'getUnavailableDatesByOthers']);
@@ -142,7 +148,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
         Route::prefix('reservations')->group(function () {
             Route::patch('update-status/{reservation}', [ReservationController::class, 'updateReservationStatus']);
-            Route::post('cancel-reservation/{reservation}', [ReservationController::class, 'cancelReservation']);
         });
     });
 
@@ -173,6 +178,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('create-backup', [BackupController::class, 'backup']);
             Route::get('download/{backup}', [BackupController::class, 'download']);
             // Route::post('restore', [BackupController::class, 'restore']);
+        });
+        Route::prefix('status')->group(function () {
+            Route::patch('/update-resort-status', [ResortStatusController::class, 'toggleResortStatus']);
         });
     });
 });

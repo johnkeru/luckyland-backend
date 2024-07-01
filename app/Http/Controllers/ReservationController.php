@@ -584,7 +584,7 @@ class ReservationController extends Controller
             // END OF GCASH PAYMENT
             return response()->json([
                 'success' => true,
-                'message' => $id ? 'Successfully Reserved!' : 'Your GCash payment is being processed. We will validate the GCash reference code shortly.'
+                'message' => $id ? 'Successfully Reserved!' : 'Thank you for your booking with us. Your GCash payment is being processed.'
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -595,11 +595,12 @@ class ReservationController extends Controller
         }
     }
 
-    public function cancelReservation(Reservation $reservation): \Illuminate\Http\JsonResponse
+    public function cancelReservation($reservationId): \Illuminate\Http\JsonResponse
     {
         try {
+            // reservationId could be id or reservationHASH coloumn. reservationHASH for resched since id is encapsulated.
+            $reservation = Reservation::where('id', $reservationId)->orWhere('reservationHASH', $reservationId)->first();
             $id = Auth::id();
-
             $reservation->status = 'Cancelled';
             $rooms = $reservation->rooms;
             foreach ($rooms as $room) {
@@ -676,19 +677,21 @@ class ReservationController extends Controller
             ReservationPaymentToken::where('reservation_id', $reservation->id)->delete();
 
             // Compose cancellation email content
-            $refundAndPaid = $reservation->paid / 2;
-            $reservation->refund = $refundAndPaid;
-            $reservation->paid  = $refundAndPaid;
+            // $refundAndPaid = $reservation->paid / 2;
+            // $reservation->refund = $refundAndPaid;
+            // $reservation->paid  = $refundAndPaid;
 
             ReservationCancelled::dispatch($reservation); // trigger when cancelled.
 
             $reservation->save();
 
-            EmployeeLogs::create([
-                'action' => 'Cancelled reservation status for customer ' . $reservation->customer->firstName . ' ' . $reservation->customer->lastName . '.',
-                'user_id' => $id,
-                'type' => 'cancel'
-            ]);
+            if ($id) {
+                EmployeeLogs::create([
+                    'action' => 'Cancelled reservation status for customer ' . $reservation->customer->firstName . ' ' . $reservation->customer->lastName . '.',
+                    'user_id' => $id,
+                    'type' => 'cancel'
+                ]);
+            }
 
             return response()->json([
                 'success' => true,
