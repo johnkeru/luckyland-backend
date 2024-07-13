@@ -2,9 +2,12 @@
 
 namespace App\Console;
 
+use App\Models\Reservation;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
+// php artisan schedule:work 
+// php artisan schedule:run 
 class Kernel extends ConsoleKernel
 {
     /**
@@ -12,8 +15,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('backup:clean')->daily()->at('01:00');
-        $schedule->command('backup:run')->daily()->at('01:30');
+        // $schedule->command('backup:clean')->daily()->at('01:00');
+        // $schedule->command('backup:run')->daily()->at('01:30');
+        $schedule->call(fn () => Reservation::updateStatusToCancelled())->daily();
     }
 
     /**

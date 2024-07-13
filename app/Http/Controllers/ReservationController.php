@@ -677,6 +677,7 @@ class ReservationController extends Controller
             ReservationPaymentToken::where('reservation_id', $reservation->id)->delete();
 
             // Compose cancellation email content
+            // updated: no more refund!
             // $refundAndPaid = $reservation->paid / 2;
             // $reservation->refund = $refundAndPaid;
             // $reservation->paid  = $refundAndPaid;

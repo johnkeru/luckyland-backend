@@ -2,12 +2,28 @@
 
 namespace App\Models;
 
+use App\Events\Reservation\ReservationCancelled;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Reservation extends Model
 {
     use HasFactory;
+
+    public static function updateStatusToCancelled()
+    {
+        $reservationsToCancel = self::query()
+            ->where('status', 'Approved')
+            ->whereDate('checkIn', '<', now()->addDay()->toDateString())
+            ->get();
+
+        foreach ($reservationsToCancel as $cancelledReservation) {
+            info($cancelledReservation->reservationHASH . ' has been cancelled!');
+            $cancelledReservation->update(['status' => 'Cancelled']);
+            ReservationCancelled::dispatch($cancelledReservation);
+        }
+    }
+
 
     protected $fillable = [
         'reservationHASH',

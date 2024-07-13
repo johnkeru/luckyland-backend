@@ -86,7 +86,7 @@ class EFCoupleRoomSeeder extends Seeder
                         'room_id' => $roomId
                     ],
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717241897/rooms/coup/ef/IMG20240527101518_plktim.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717243347/rooms/fam/IMG20240527101230_ij9gcw.jpg',
                         'room_id' => $roomId
                     ],
                 ]
@@ -108,7 +108,7 @@ class EFCoupleRoomSeeder extends Seeder
                         'room_id' => $roomId
                     ],
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717241897/rooms/coup/ef/IMG20240527101518_plktim.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717243347/rooms/fam/IMG20240527101230_ij9gcw.jpg',
                         'room_id' => $roomId
                     ],
                 ]
@@ -130,7 +130,7 @@ class EFCoupleRoomSeeder extends Seeder
                         'room_id' => $roomId
                     ],
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717241897/rooms/coup/ef/IMG20240527101518_plktim.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717243347/rooms/fam/IMG20240527101230_ij9gcw.jpg',
                         'room_id' => $roomId
                     ],
                 ]
@@ -152,7 +152,7 @@ class EFCoupleRoomSeeder extends Seeder
                         'room_id' => $roomId
                     ],
                     [
-                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717241897/rooms/coup/ef/IMG20240527101518_plktim.jpg',
+                        'url' => 'https://res.cloudinary.com/kerutman/image/upload/v1717243347/rooms/fam/IMG20240527101230_ij9gcw.jpg',
                         'room_id' => $roomId
                     ],
                 ]
