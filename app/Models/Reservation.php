@@ -53,8 +53,7 @@ class Reservation extends Model
         'gCashRefNumber',
         'gCashRefNumberURL',
 
-        'isMinimumAccepted',
-        'isPaymentWithinDay',
+        'isChecked',
         'isConfirmed',
     ];
 

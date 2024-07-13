@@ -56,8 +56,7 @@ class AddReservationRequest extends FormRequest
             'customer' => 'required',
             'isWalkIn' => 'boolean',
 
-            'isMinimumAccepted' => 'required|boolean',
-            'isPaymentWithinDay' => 'required|boolean',
+            'isChecked' => 'required|boolean',
             'isConfirmed' => 'required|boolean',
         ];
     }

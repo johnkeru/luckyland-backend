@@ -26,8 +26,7 @@ return new class extends Migration
             $table->integer('refund')->nullable();
             $table->integer('guests')->min(1);
 
-            $table->boolean('isMinimumAccepted');
-            $table->boolean('isPaymentWithinDay');
+            $table->boolean('isChecked'); // agree on terms and policy
             $table->boolean('isConfirmed');
 
             $table->enum('status', ['Approved', 'Cancelled', 'Departed', 'In Resort'])->default('Approved');
