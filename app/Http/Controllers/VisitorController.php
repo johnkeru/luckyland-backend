@@ -3,27 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Models\Visitor;
+use Illuminate\Http\Request;
 
 class VisitorController extends Controller
 {
     // Display the visitor count
     public function show()
     {
-        $visitor = Visitor::first();
-        if (!$visitor) {
-            $visitor = Visitor::create(['count' => 0]);
-        }
-        return response()->json(['data' => $visitor->count]);
+        $count = Visitor::count();
+        return response()->json(['data' => $count]);
     }
 
-    // Increment the visitor count
-    public function increment()
+    // Store the visitor's IP address
+    public function store(Request $request)
     {
-        $visitor = Visitor::first();
-        if (!$visitor) {
-            $visitor = Visitor::create(['count' => 0]);
+        $ipAddress = $request->ip();
+        $isRecent = Visitor::where('ip_address', $ipAddress)->first();
+        if (!$isRecent) {
+            Visitor::create(['ip_address' => $ipAddress]);
+            return response()->json(['message' => 'IP address stored successfully']);
         }
-        $visitor->increment('count');
-        return response()->json(['count' => $visitor->count]);
+        return response()->noContent();
     }
 }

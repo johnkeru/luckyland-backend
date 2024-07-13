@@ -16,19 +16,17 @@ use App\Http\Controllers\RoomController;
 use App\Http\Controllers\UnavailableController;
 use App\Http\Controllers\VisitorController;
 use App\Http\Controllers\WasteController;
+use App\Models\Visitor;
 use Illuminate\Support\Facades\Route;
 
 
-Route::get('hi', function () {
-    return response()->json([
-        'data' => 'the developer of this api is awesome!',
-    ]);
-});
+Route::get('hi', fn () => response()->json(['data' => 'the developer of this api is awesome!',]));
+Route::get('awesome-visitors', fn () => response()->json(Visitor::all()->pluck('ip_address')));
 
 Route::get('/status/get-resort-status', [ResortStatusController::class, 'getResortStatus']);
 
 Route::get('/visitor', [VisitorController::class, 'show']);
-Route::post('/visitor/increment', [VisitorController::class, 'increment']);
+Route::post('/visitor/increment', [VisitorController::class, 'store']);
 
 Route::get('faqs', [FAQController::class, 'index']);
 Route::post('faqs', [FAQController::class, 'question']);
