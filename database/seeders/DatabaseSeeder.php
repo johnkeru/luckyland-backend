@@ -73,7 +73,19 @@ class DatabaseSeeder extends Seeder
             ],
         ];
 
-        User::insert($users);
+        User::insert([[
+            'firstName' => 'John',
+            'middleName' => 'M.',
+            'lastName' => 'Keru',
+            'email' => 'johnkeru128@gmail.com',
+            'phoneNumber' => '09876543210',
+            'graduated_at' => 'Forbes College',
+            'description' => "Developer",
+            'facebook' => 'https://www.facebook.com/profile.php?id=100009257219664',
+            'email_verified_at' => now(),
+            'password' => Hash::make('keru'),
+            'remember_token' => Str::random(10),
+        ]]);
 
         // it will create a status for resort. default to true(open)
         $this->call(ResortStatusSeeder::class);
