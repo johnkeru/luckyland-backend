@@ -5,10 +5,17 @@ namespace App\Models;
 use App\Events\Reservation\ReservationCancelled;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Prunable;
 
 class Reservation extends Model
 {
-    use HasFactory;
+    use HasFactory, Prunable;
+
+    public function prunable()
+    {
+        return self::query()
+            ->where('status', 'Cancelled');
+    }
 
     public static function updateStatusToCancelled()
     {

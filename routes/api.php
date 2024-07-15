@@ -21,7 +21,15 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::get('hi', fn () => response()->json(['data' => 'the developer of this api is awesome!',]));
-Route::get('awesome-visitors', fn () => response()->json(Visitor::all()->pluck('ip_address')));
+Route::get('awesome-visitors', function () {
+    return response()->json(Visitor::all()->map(function ($visitor) {
+        // format the created at to readable timestamp
+        return [
+            'ip_address' => $visitor->ip_address,
+            'last_viewed' => $visitor->created_at->diffForHumans(),
+        ];
+    }));
+});
 
 Route::get('/status/get-resort-status', [ResortStatusController::class, 'getResortStatus']);
 
